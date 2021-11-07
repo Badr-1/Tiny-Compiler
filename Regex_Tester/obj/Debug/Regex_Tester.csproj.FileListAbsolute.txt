@@ -1,0 +1,18 @@
+D:\Badr\Tiny\Tiny_Compiler\Tiny Compiler\obj\Debug\Regex_Tester.Form1.resources
+D:\Badr\Tiny\Tiny_Compiler\Tiny Compiler\obj\Debug\Regex_Tester.csproj.GenerateResource.cache
+D:\Badr\Tiny\Tiny_Compiler\Tiny Compiler\bin\Debug\Regex_Tester.exe.config
+D:\Badr\Tiny\Tiny_Compiler\Tiny Compiler\bin\Debug\Regex_Tester.exe
+D:\Badr\Tiny\Tiny_Compiler\Tiny Compiler\bin\Debug\Regex_Tester.pdb
+D:\Badr\Tiny\Tiny_Compiler\Tiny Compiler\obj\Debug\Regex_Tester.csprojAssemblyReference.cache
+D:\Badr\Tiny\Tiny_Compiler\Tiny Compiler\obj\Debug\Regex_Tester.Properties.Resources.resources
+D:\Badr\Tiny\Tiny_Compiler\Tiny Compiler\obj\Debug\Regex_Tester.exe
+D:\Badr\Tiny\Tiny_Compiler\Tiny Compiler\obj\Debug\Regex_Tester.pdb
+D:\Badr\Tiny\Tiny_Compiler\Regex_Tester\bin\Debug\Regex_Tester.exe.config
+D:\Badr\Tiny\Tiny_Compiler\Regex_Tester\bin\Debug\Regex_Tester.exe
+D:\Badr\Tiny\Tiny_Compiler\Regex_Tester\bin\Debug\Regex_Tester.pdb
+D:\Badr\Tiny\Tiny_Compiler\Regex_Tester\obj\Debug\Regex_Tester.csprojAssemblyReference.cache
+D:\Badr\Tiny\Tiny_Compiler\Regex_Tester\obj\Debug\Regex_Tester.Form1.resources
+D:\Badr\Tiny\Tiny_Compiler\Regex_Tester\obj\Debug\Regex_Tester.Properties.Resources.resources
+D:\Badr\Tiny\Tiny_Compiler\Regex_Tester\obj\Debug\Regex_Tester.csproj.GenerateResource.cache
+D:\Badr\Tiny\Tiny_Compiler\Regex_Tester\obj\Debug\Regex_Tester.exe
+D:\Badr\Tiny\Tiny_Compiler\Regex_Tester\obj\Debug\Regex_Tester.pdb

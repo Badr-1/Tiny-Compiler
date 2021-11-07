@@ -1,9 +1,0 @@
-C:\Users\NOUR\source\repos\Tiny Compiler\Tiny Compiler\bin\Debug\Tiny Compiler.exe.config
-C:\Users\NOUR\source\repos\Tiny Compiler\Tiny Compiler\bin\Debug\Tiny Compiler.exe
-C:\Users\NOUR\source\repos\Tiny Compiler\Tiny Compiler\bin\Debug\Tiny Compiler.pdb
-C:\Users\NOUR\source\repos\Tiny Compiler\Tiny Compiler\obj\Debug\Tiny Compiler.csprojAssemblyReference.cache
-C:\Users\NOUR\source\repos\Tiny Compiler\Tiny Compiler\obj\Debug\Tiny_Compiler.Form1.resources
-C:\Users\NOUR\source\repos\Tiny Compiler\Tiny Compiler\obj\Debug\Tiny_Compiler.Properties.Resources.resources
-C:\Users\NOUR\source\repos\Tiny Compiler\Tiny Compiler\obj\Debug\Tiny Compiler.csproj.GenerateResource.cache
-C:\Users\NOUR\source\repos\Tiny Compiler\Tiny Compiler\obj\Debug\Tiny Compiler.exe
-C:\Users\NOUR\source\repos\Tiny Compiler\Tiny Compiler\obj\Debug\Tiny Compiler.pdb
