@@ -18,7 +18,7 @@ public enum Token_Class
     Dot, Semicolon, Comma, LParanthesis, RParanthesis,LCurlyBracket,RCurlyBracket,
 
     // else
-    Idenifier, Constant 
+    Idenifier, Constant,Comment
 }
 namespace Tiny_Compiler
 {
@@ -138,10 +138,10 @@ namespace Tiny_Compiler
 
                 else if (CurrentChar == ':')
                 {
-                    if(j + 1 < SourceCode.Length)
+                    if (j + 1 < SourceCode.Length)
                     {
                         j++;
-                        if(SourceCode[j] == '=')
+                        if (SourceCode[j] == '=')
                         {
                             CurrentLexeme += SourceCode[j];
                         }
@@ -149,24 +149,24 @@ namespace Tiny_Compiler
                         i = j;
                     }
                 }
-                else if(CurrentChar == '<')
+                else if (CurrentChar == '<')
                 {
-                    if(j + 1< SourceCode.Length)
+                    if (j + 1 < SourceCode.Length)
                     {
                         j++;
-                        if(SourceCode[j] == '>')
+                        if (SourceCode[j] == '>')
                         {
                             CurrentLexeme += SourceCode[j];
                         }
                         i = j;
                     }
                 }
-                else if(CurrentChar == '|')
+                else if (CurrentChar == '|')
                 {
-                    if(j +1 <SourceCode.Length)
+                    if (j + 1 < SourceCode.Length)
                     {
                         j++;
-                        if(SourceCode[j] == '|')
+                        if (SourceCode[j] == '|')
                         {
                             CurrentLexeme += SourceCode[j];
                         }
@@ -183,6 +183,37 @@ namespace Tiny_Compiler
                             CurrentLexeme += SourceCode[j];
                         }
                         i = j;
+                    }
+                }
+                else if (CurrentChar == '/')
+                {
+                    if (j + 1 < SourceCode.Length)
+                    {
+                        j++;
+                        if (SourceCode[j] == '*')
+                        {
+                            bool isAboutToFinish = false;
+                            bool isFinished = false;
+                            CurrentLexeme += SourceCode[j];
+                            j++;
+                            while (j < SourceCode.Length && !isFinished)
+                            {
+
+                                if (isAboutToFinish && SourceCode[j] == '/')
+                                {
+                                    CurrentLexeme += SourceCode[j];
+                                    isFinished = true;
+                                }
+                                else
+                                {
+                                    CurrentLexeme += SourceCode[j];
+                                    isAboutToFinish = (SourceCode[j] == '*');
+                                }
+                                j++;
+                            }
+                            j--;
+                            i = j;
+                        }
                     }
                 }
                 else
@@ -238,13 +269,27 @@ namespace Tiny_Compiler
                 isIdentifed = true;
 
             }
+            if(isComment(Lex))
+            {
+                /*to show the comment on the table uncomment the next segment*/
+
+                /*
+                 * Tok.token_type = Token_Class.Comment;
+                 * Tokens.Add(Tok);
+                */
+                isIdentifed = true;
+            }
 
             //Is it an undefined?
             if (!isIdentifed)
                 Errors.Error_List.Add("\"" + Lex + "\" is undefined");
         }
 
-
+        private bool isComment(string lex)
+        {
+            Regex regex = new Regex(@"^((\/\*)(.*)(\*\/))$");
+            return regex.IsMatch(lex);
+        }
 
         bool isIdentifier(string lex)
         {

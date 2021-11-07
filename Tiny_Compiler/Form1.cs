@@ -19,7 +19,8 @@ namespace Tiny_Compiler
 
         private void button1_Click(object sender, EventArgs e)
         {
-            textBox2.Clear();
+            textBox2.Text="";
+            Errors.Error_List.Clear();
             Tiny_Compiler.TokenStream.Clear();
             dataGridView1.Rows.Clear();
             //string Code=textBox1.Text.ToLower();
