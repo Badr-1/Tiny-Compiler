@@ -185,40 +185,48 @@ namespace Tiny_Compiler
                         i = j;
                     }
                 }
-                else if (CurrentChar == '/')
+                else if (j + 1 < SourceCode.Length && CurrentChar == '/' && SourceCode[j+1] == '*')
                 {
-                    if (j + 1 < SourceCode.Length)
+                    j++;
+                    if (SourceCode[j] == '*')
                     {
+                        bool isAboutToFinish = false;
+                        bool isFinished = false;
+                        CurrentLexeme += SourceCode[j];
                         j++;
-                        if (SourceCode[j] == '*')
+                        while (j < SourceCode.Length && !isFinished)
                         {
-                            bool isAboutToFinish = false;
-                            bool isFinished = false;
-                            CurrentLexeme += SourceCode[j];
-                            j++;
-                            while (j < SourceCode.Length && !isFinished)
-                            {
 
-                                if (isAboutToFinish && SourceCode[j] == '/')
-                                {
-                                    CurrentLexeme += SourceCode[j];
-                                    isFinished = true;
-                                }
-                                else
-                                {
-                                    CurrentLexeme += SourceCode[j];
-                                    isAboutToFinish = (SourceCode[j] == '*');
-                                }
-                                j++;
+                            if (isAboutToFinish && SourceCode[j] == '/')
+                            {
+                                CurrentLexeme += SourceCode[j];
+                                isFinished = true;
                             }
-                            j--;
-                            i = j;
+                            else
+                            {
+                                CurrentLexeme += SourceCode[j];
+                                isAboutToFinish = (SourceCode[j] == '*');
+                            }
+                            j++;
                         }
+                        j--;
+                        i = j;
+
                     }
                 }
                 else
                 {
-                    
+                    if (j + 1 < SourceCode.Length)
+                    {
+                        j++;
+                        while (j < SourceCode.Length && (SourceCode[j] == '*' || SourceCode[j] == '/' || SourceCode[j] == '+' || SourceCode[j] == '-'))
+                        {
+                            CurrentLexeme += SourceCode[j];
+                            j++;
+                        }
+                        j--;
+                        i = j;
+                    }
                 }
                 //TODO: Ignore Comments
                 FindTokenClass(CurrentLexeme);
