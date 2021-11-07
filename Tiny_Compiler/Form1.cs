@@ -20,6 +20,8 @@ namespace Tiny_Compiler
         private void button1_Click(object sender, EventArgs e)
         {
             textBox2.Clear();
+            Tiny_Compiler.TokenStream.Clear();
+            dataGridView1.Rows.Clear();
             //string Code=textBox1.Text.ToLower();
             string Code = textBox1.Text;
             Tiny_Compiler.Start_Compiling(Code);
@@ -56,8 +58,15 @@ namespace Tiny_Compiler
 
         private void button2_Click(object sender, EventArgs e)
         {
+
+            regex.Text = "";
+            for (int i = 0; i < Tiny_Compiler.TokenStream.Count; i++)
+                regex.Text += Tiny_Compiler.TokenStream[i].lex;
+                
             dataGridView1.Rows.Clear();
             Tiny_Compiler.TokenStream.Clear();
+            Errors.Error_List.Clear();
+            textBox2.Text = "";
         }
 
         private void textBox2_TextChanged(object sender, EventArgs e)

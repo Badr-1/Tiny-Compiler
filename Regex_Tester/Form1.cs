@@ -86,6 +86,10 @@ namespace Regex_Tester
             Reserved.Add("endl");
             Reserved.Add("end");
             Function_Call = "(" + Identifiers + @"\(" + "(" + "(" + Identifiers + "|" + Number + ")" + "(," + "(" + Identifiers + "|" + Number + ")" + ")*" + ")?" + @"\)" + ")";
+
+
+
+
             Term = "(" + Function_Call + "|" + Identifiers + "|" + Number + ")";
 
 
@@ -129,6 +133,7 @@ namespace Regex_Tester
 
 
 
+
             set_of_statement = "(" + Read_Statement + "|" + Write_Statement + "|" + Assignment_Statement + ";|" + Declaration_Statement + "|" + Comment_Statement + ")+";
 
             Repeat_Statement = "(" + "repeat" + set_of_statement + "until" + Condition_Statement + ")";
@@ -143,7 +148,9 @@ namespace Regex_Tester
             Else_If_Statement += "(" + "(" + "elseif" + Condition_Statement + "then" + set_of_statement + ")+" + "(" + Else_Statement + "|" + "end" + ")" + ")";
 
 
+
             If_Statement = "(" + "if" + Condition_Statement + "then" + set_of_statement + "(" + Else_If_Statement + "|" + Else_Statement + "|" + "end" + ")" + ")";
+
 
 
 
@@ -153,7 +160,11 @@ namespace Regex_Tester
 
             Parameter = "(" + Datatype + Identifiers + ")";
             Function_Declaration = "(" + Datatype + FunctionName + @"\(" + "(" + Parameter + "(" + "," + Parameter + ")*" + ")?" + @"\)" + ")";
-            Function_Body = @"(\{" + set_of_statement + "*" + Return_Statement + @"\})";
+
+
+
+
+            Function_Body = @"(\{" + set_of_statement + "?" + Return_Statement + @"\})";
             Function_Statement = "(" + Function_Declaration + Function_Body + ")";
             Main_Function = "(" + Datatype + @"main\(\)" + Function_Body + ")";
             Program = "(" + Function_Statement + "*" + Main_Function + ")";

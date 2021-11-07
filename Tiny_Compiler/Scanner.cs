@@ -3,18 +3,25 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using System.Text.RegularExpressions;
 public enum Token_Class
 {
-    Begin, Call, Declare, End, Do, Else, EndIf, EndUntil, EndWhile, If, Integer,
-    Parameters, Procedure, Program, Read, Real, Set, Then, Until, While, Write,
-    Dot, Semicolon, Comma, LParanthesis, RParanthesis, EqualOp, LessThanOp,
-    GreaterThanOp, NotEqualOp, PlusOp, MinusOp, MultiplyOp, DivideOp,
-    Idenifier, Constant
+
+    // Reserved
+    Int,Float,String,Read,Write,Repeat,Until,If,Elseif,Else,Then,Return,Endl,End,
+
+
+    // Oprators
+    EqualOp, LessThanOp, GreaterThanOp, NotEqualOp, PlusOp, MinusOp, MultiplyOp, DivideOp,AndOp,OrOp, AssignOP,
+
+    //
+    Dot, Semicolon, Comma, LParanthesis, RParanthesis,LCurlyBracket,RCurlyBracket,
+
+    // else
+    Idenifier, Constant 
 }
 namespace Tiny_Compiler
 {
-
 
     public class Token
     {
@@ -30,44 +37,42 @@ namespace Tiny_Compiler
 
         public Scanner()
         {
-            ReservedWords.Add("IF", Token_Class.If);
-            ReservedWords.Add("BEGIN", Token_Class.Begin);
-            ReservedWords.Add("CALL", Token_Class.Call);
-            ReservedWords.Add("DECLARE", Token_Class.Declare);
-            ReservedWords.Add("END", Token_Class.End);
-            ReservedWords.Add("DO", Token_Class.Do);
-            ReservedWords.Add("ELSE", Token_Class.Else);
-            ReservedWords.Add("ENDIF", Token_Class.EndIf);
-            ReservedWords.Add("ENDUNTIL", Token_Class.EndUntil);
-            ReservedWords.Add("ENDWHILE", Token_Class.EndWhile);
-            ReservedWords.Add("INTEGER", Token_Class.Integer);
-            ReservedWords.Add("PARAMETERS", Token_Class.Parameters);
-            ReservedWords.Add("PROCEDURE", Token_Class.Procedure);
-            ReservedWords.Add("PROGRAM", Token_Class.Program);
-            ReservedWords.Add("READ", Token_Class.Read);
-            ReservedWords.Add("REAL", Token_Class.Real);
-            ReservedWords.Add("SET", Token_Class.Set);
-            ReservedWords.Add("THEN", Token_Class.Then);
-            ReservedWords.Add("UNTIL", Token_Class.Until);
-            ReservedWords.Add("WHILE", Token_Class.While);
-            ReservedWords.Add("WRITE", Token_Class.Write);
 
-            Operators.Add(".", Token_Class.Dot);
-            Operators.Add(";", Token_Class.Semicolon);
-            Operators.Add(",", Token_Class.Comma);
-            Operators.Add("(", Token_Class.LParanthesis);
-            Operators.Add(")", Token_Class.RParanthesis);
+
+            ReservedWords.Add("if", Token_Class.If);
+            ReservedWords.Add("end", Token_Class.End);
+            ReservedWords.Add("else", Token_Class.Else);
+            ReservedWords.Add("elseif", Token_Class.Elseif);
+            ReservedWords.Add("read", Token_Class.Read);
+            ReservedWords.Add("then", Token_Class.Then);
+            ReservedWords.Add("until", Token_Class.Until);
+            ReservedWords.Add("write", Token_Class.Write);
+            ReservedWords.Add("int", Token_Class.Int);
+            ReservedWords.Add("float", Token_Class.Float);
+            ReservedWords.Add("string", Token_Class.String);
+            ReservedWords.Add("repeat", Token_Class.Repeat);
+            ReservedWords.Add("return", Token_Class.Return);
+            ReservedWords.Add("endl", Token_Class.Endl);
+
+
+            Operators.Add(":=", Token_Class.AssignOP);
             Operators.Add("=", Token_Class.EqualOp);
             Operators.Add("<", Token_Class.LessThanOp);
             Operators.Add(">", Token_Class.GreaterThanOp);
-            Operators.Add("!", Token_Class.NotEqualOp);
+            Operators.Add("<>", Token_Class.NotEqualOp);
             Operators.Add("+", Token_Class.PlusOp);
             Operators.Add("-", Token_Class.MinusOp);
             Operators.Add("*", Token_Class.MultiplyOp);
             Operators.Add("/", Token_Class.DivideOp);
-
-
-
+            Operators.Add("&&", Token_Class.AndOp);
+            Operators.Add("||", Token_Class.OrOp);
+            Operators.Add(")", Token_Class.RParanthesis);
+            Operators.Add("(", Token_Class.LParanthesis);
+            Operators.Add("}", Token_Class.RCurlyBracket);
+            Operators.Add("{", Token_Class.LCurlyBracket);
+            Operators.Add(".", Token_Class.Dot);
+            Operators.Add(",", Token_Class.Comma);
+            Operators.Add(";", Token_Class.Semicolon);
         }
 
         public void StartScanning(string SourceCode)
@@ -78,46 +83,165 @@ namespace Tiny_Compiler
                 char CurrentChar = SourceCode[i];
                 string CurrentLexeme = CurrentChar.ToString();
 
-                if (CurrentChar == ' ' || CurrentChar == '\r' || CurrentChar == '\n')
+                if (isItEmpty(CurrentChar))
                     continue;
 
-                if (CurrentChar >= 'A' && CurrentChar <= 'z') //if you read a character
+                if (isItALetter(CurrentChar)) //if you read a character
                 {
-
+                    // if it the last char
+                    if (j + 1 < SourceCode.Length)
+                    {
+                        j++;
+                        while (j < SourceCode.Length && (isItALetterOrADigit(SourceCode[j])))
+                        {
+                            CurrentLexeme += SourceCode[j];
+                            j++;
+                        }
+                        j--;
+                        i = j;
+                    }
                 }
 
-                else if (CurrentChar >= '0' && CurrentChar <= '9')
+                else if (isItADigit(CurrentChar))
                 {
 
+                    // if it the last char
+                    if (j + 1 < SourceCode.Length)
+                    {
+                        j++;
+                        while (j < SourceCode.Length && (isItALetterOrADigit(SourceCode[j]) || SourceCode[j] == '.'))
+                        {
+                            CurrentLexeme += SourceCode[j];
+                            j++;
+                        }
+                        j--;
+                        i = j;
+                    }
                 }
-                else if (CurrentChar == '{')
-                {
 
+                else if (CurrentChar == '"')
+                {
+                    // if it the last char
+                    if (j + 1 < SourceCode.Length)
+                    {
+                        j++;
+                        while (j < SourceCode.Length && !(SourceCode[j] == '"'))
+                        {
+                            CurrentLexeme += SourceCode[j];
+                            j++;
+                        }
+                        if (j < SourceCode.Length)
+                            CurrentLexeme += SourceCode[j];
+                        i = j;
+                    }
+                }
+
+                else if (CurrentChar == ':')
+                {
+                    if(j + 1 < SourceCode.Length)
+                    {
+                        j++;
+                        if(SourceCode[j] == '=')
+                        {
+                            CurrentLexeme += SourceCode[j];
+                        }
+
+                        i = j;
+                    }
+                }
+                else if(CurrentChar == '<')
+                {
+                    if(j + 1< SourceCode.Length)
+                    {
+                        j++;
+                        if(SourceCode[j] == '>')
+                        {
+                            CurrentLexeme += SourceCode[j];
+                        }
+                        i = j;
+                    }
+                }
+                else if(CurrentChar == '|')
+                {
+                    if(j +1 <SourceCode.Length)
+                    {
+                        j++;
+                        if(SourceCode[j] == '|')
+                        {
+                            CurrentLexeme += SourceCode[j];
+                        }
+                        i = j;
+                    }
+                }
+                else if (CurrentChar == '&')
+                {
+                    if (j + 1 < SourceCode.Length)
+                    {
+                        j++;
+                        if (SourceCode[j] == '&')
+                        {
+                            CurrentLexeme += SourceCode[j];
+                        }
+                        i = j;
+                    }
                 }
                 else
                 {
-
+                    
                 }
+                //TODO: Ignore Comments
+                FindTokenClass(CurrentLexeme);
             }
 
             Tiny_Compiler.TokenStream = Tokens;
+
+
+
         }
         void FindTokenClass(string Lex)
         {
             Token_Class TC;
             Token Tok = new Token();
             Tok.lex = Lex;
+            bool isIdentifed = false;
             //Is it a reserved word?
-
+            if (ReservedWords.ContainsKey(Lex))
+            {
+                Tok.token_type = ReservedWords[Lex];
+                Tokens.Add(Tok);
+                isIdentifed = true;
+            }
 
             //Is it an identifier?
+            if (!ReservedWords.ContainsKey(Lex) && isIdentifier(Lex))
+            {
+                Tok.token_type = Token_Class.Idenifier;
+                Tokens.Add(Tok);
+                isIdentifed = true;
 
+            }
 
             //Is it a Constant?
+            if (isConstant(Lex))
+            {
+                Tok.token_type = Token_Class.Constant;
+                Tokens.Add(Tok);
+                isIdentifed = true;
+
+            }
 
             //Is it an operator?
+            if (Operators.ContainsKey(Lex))
+            {
+                Tok.token_type = Operators[Lex];
+                Tokens.Add(Tok);
+                isIdentifed = true;
+
+            }
 
             //Is it an undefined?
+            if (!isIdentifed)
+                Errors.Error_List.Add("\"" + Lex + "\" is undefined");
         }
 
 
@@ -126,6 +250,8 @@ namespace Tiny_Compiler
         {
             bool isValid = true;
             // Check if the lex is an identifier or not.
+            Regex regex = new Regex("^([a-zA-Z][a-zA-Z0-9]*)$");
+            isValid = regex.IsMatch(lex);
 
             return isValid;
         }
@@ -133,8 +259,27 @@ namespace Tiny_Compiler
         {
             bool isValid = true;
             // Check if the lex is a constant (Number) or not.
-
+            Regex regex = new Regex("^(([0-9]+(\\.[0-9]+)?)|(\"(.*)\"))$");
+            isValid = regex.IsMatch(lex);
             return isValid;
         }
+        bool isItALetter(char c)
+        {
+            return (c >= 'A' && c <= 'z');
+        }
+        bool isItADigit(char c)
+        {
+            return (c >= '0' && c <= '9');
+        }
+        bool isItALetterOrADigit(char c)
+        {
+            return (c >= 'A' && c <= 'z') || (c >= '0' && c <= '9');
+        }
+
+        bool isItEmpty(char c)
+        {
+            return (c == ' ' || c == '\r' || c == '\n' || c == '\t');
+        }
+
     }
 }
