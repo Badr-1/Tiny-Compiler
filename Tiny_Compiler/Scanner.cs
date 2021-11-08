@@ -18,7 +18,7 @@ public enum Token_Class
     Dot, Semicolon, Comma, LParanthesis, RParanthesis,LCurlyBracket,RCurlyBracket,
 
     // else
-    Idenifier, Constant,Comment
+    Idenifier, Constant
 }
 namespace Tiny_Compiler
 {
@@ -86,9 +86,10 @@ namespace Tiny_Compiler
                 if (isItEmpty(CurrentChar))
                     continue;
 
+                // if it starts with a char it can be a reserevedword or an identifier (allow  only digits and letters to the lexeme) 
                 if (isItALetter(CurrentChar)) //if you read a character
                 {
-                    // if it the last char
+                    // if it's not the last char
                     if (j + 1 < SourceCode.Length)
                     {
                         j++;
@@ -102,15 +103,20 @@ namespace Tiny_Compiler
                     }
                 }
 
+                // if it starts with a digit it can only be a number (allow only digits and one dot)
                 else if (isItADigit(CurrentChar))
                 {
 
-                    // if it the last char
+                    // if it's not the last char
                     if (j + 1 < SourceCode.Length)
                     {
                         j++;
-                        while (j < SourceCode.Length && (isItALetterOrADigit(SourceCode[j]) || SourceCode[j] == '.'))
+                        bool isThereADot = false;
+                        while (j < SourceCode.Length && (isItADigit(SourceCode[j]) || (SourceCode[j] == '.' && !isThereADot)))
                         {
+                            // to allow only one dot then reset
+                            if (SourceCode[j] == '.')
+                                isThereADot = true;
                             CurrentLexeme += SourceCode[j];
                             j++;
                         }
@@ -119,9 +125,10 @@ namespace Tiny_Compiler
                     }
                 }
 
+                // if it starts with a " then every thing is allowed till typing " again
                 else if (CurrentChar == '"')
                 {
-                    // if it the last char
+                    // if it's not the last char
                     if (j + 1 < SourceCode.Length)
                     {
                         j++;
@@ -135,7 +142,7 @@ namespace Tiny_Compiler
                         i = j;
                     }
                 }
-
+                // if it starts with : and followed by a = it's an assign lexeme
                 else if (CurrentChar == ':')
                 {
                     if (j + 1 < SourceCode.Length)
@@ -149,47 +156,55 @@ namespace Tiny_Compiler
                         i = j;
                     }
                 }
+                // if it starts with < if the next is > then it's a notEqualOp or it can be just LessThanoOp
                 else if (CurrentChar == '<')
                 {
                     if (j + 1 < SourceCode.Length)
                     {
-                        j++;
-                        if (SourceCode[j] == '>')
+                        
+                        if (SourceCode[j+1] == '>')
                         {
+                            j++;
                             CurrentLexeme += SourceCode[j];
                         }
                         i = j;
                     }
                 }
+                // if it starts with | check if it's followed by another | to get OrOp
                 else if (CurrentChar == '|')
                 {
                     if (j + 1 < SourceCode.Length)
                     {
-                        j++;
-                        if (SourceCode[j] == '|')
+                      
+                        if (SourceCode[j+1] == '|')
                         {
+                            j++;
                             CurrentLexeme += SourceCode[j];
                         }
                         i = j;
                     }
                 }
+                // if it starts with | check if it's followed by another | to get AndOp
                 else if (CurrentChar == '&')
                 {
                     if (j + 1 < SourceCode.Length)
                     {
-                        j++;
-                        if (SourceCode[j] == '&')
+                        
+                        if (SourceCode[j+1] == '&')
                         {
+                            j++;
                             CurrentLexeme += SourceCode[j];
                         }
                         i = j;
                     }
                 }
+                // if it starts with / followed by * then allow every thing except */
                 else if (j + 1 < SourceCode.Length && CurrentChar == '/' && SourceCode[j+1] == '*')
                 {
-                    j++;
-                    if (SourceCode[j] == '*')
+                  
+                    if (SourceCode[++j] == '*')
                     {
+                        int start = j - 1;
                         bool isAboutToFinish = false;
                         bool isFinished = false;
                         CurrentLexeme += SourceCode[j];
@@ -210,28 +225,26 @@ namespace Tiny_Compiler
                             j++;
                         }
                         j--;
+                       
+                        if(!isFinished)
+                        {
+                            j = start;
+                            CurrentLexeme = SourceCode[j].ToString();
+                        }
                         i = j;
 
                     }
                 }
                 else
                 {
-                    if (j + 1 < SourceCode.Length)
-                    {
-                        j++;
-                        while (j < SourceCode.Length && (SourceCode[j] == '*' || SourceCode[j] == '/' || SourceCode[j] == '+' || SourceCode[j] == '-'))
-                        {
-                            CurrentLexeme += SourceCode[j];
-                            j++;
-                        }
-                        j--;
-                        i = j;
-                    }
-                }
-                //TODO: Ignore Comments
-                FindTokenClass(CurrentLexeme);
-            }
 
+                   
+                }
+                // if it's a comment then ignore
+                if (!isComment(CurrentLexeme))
+                    FindTokenClass(CurrentLexeme);
+            }
+            
             Tiny_Compiler.TokenStream = Tokens;
 
 
@@ -277,17 +290,7 @@ namespace Tiny_Compiler
                 isIdentifed = true;
 
             }
-            if(isComment(Lex))
-            {
-                /*to show the comment on the table uncomment the next segment*/
-
-                /*
-                 * Tok.token_type = Token_Class.Comment;
-                 * Tokens.Add(Tok);
-                */
-                isIdentifed = true;
-            }
-
+           
             //Is it an undefined?
             if (!isIdentifed)
                 Errors.Error_List.Add("\"" + Lex + "\" is undefined");
