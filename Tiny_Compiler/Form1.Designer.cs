@@ -38,6 +38,7 @@
             this.label2 = new System.Windows.Forms.Label();
             this.button2 = new System.Windows.Forms.Button();
             this.regex = new System.Windows.Forms.TextBox();
+            this.isCaseSensitive = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -65,7 +66,7 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(117, 474);
+            this.button1.Location = new System.Drawing.Point(117, 480);
             this.button1.Margin = new System.Windows.Forms.Padding(2);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(170, 55);
@@ -145,11 +146,22 @@
             this.regex.Size = new System.Drawing.Size(263, 114);
             this.regex.TabIndex = 7;
             // 
+            // isCaseSensitive
+            // 
+            this.isCaseSensitive.AutoSize = true;
+            this.isCaseSensitive.Location = new System.Drawing.Point(17, 458);
+            this.isCaseSensitive.Name = "isCaseSensitive";
+            this.isCaseSensitive.Size = new System.Drawing.Size(116, 21);
+            this.isCaseSensitive.TabIndex = 8;
+            this.isCaseSensitive.Text = "Case Sensitive";
+            this.isCaseSensitive.UseVisualStyleBackColor = true;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1114, 543);
+            this.Controls.Add(this.isCaseSensitive);
             this.Controls.Add(this.regex);
             this.Controls.Add(this.button2);
             this.Controls.Add(this.label2);
@@ -179,6 +191,7 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.TextBox regex;
+        private System.Windows.Forms.CheckBox isCaseSensitive;
     }
 }
 

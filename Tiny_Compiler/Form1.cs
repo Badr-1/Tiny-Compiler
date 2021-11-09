@@ -25,7 +25,7 @@ namespace Tiny_Compiler
             dataGridView1.Rows.Clear();
             //string Code=textBox1.Text.ToLower();
             string Code = textBox1.Text;
-            Tiny_Compiler.Start_Compiling(Code);
+            Tiny_Compiler.Start_Compiling(Code,isCaseSensitive.Checked);
             PrintTokens();
             //   PrintLexemes();
 

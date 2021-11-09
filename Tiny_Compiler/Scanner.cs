@@ -34,10 +34,12 @@ namespace Tiny_Compiler
         public List<Token> Tokens = new List<Token>();
         Dictionary<string, Token_Class> ReservedWords = new Dictionary<string, Token_Class>();
         Dictionary<string, Token_Class> Operators = new Dictionary<string, Token_Class>();
+        Form1 form1 = new Form1();
+        bool isCaseSensitive;
+
 
         public Scanner()
         {
-
 
             ReservedWords.Add("if", Token_Class.If);
             ReservedWords.Add("end", Token_Class.End);
@@ -75,8 +77,9 @@ namespace Tiny_Compiler
             Operators.Add(";", Token_Class.Semicolon);
         }
 
-        public void StartScanning(string SourceCode)
+        public void StartScanning(string SourceCode,bool isCaseSensitive)
         {
+            this.isCaseSensitive = isCaseSensitive;
             for (int i = 0; i < SourceCode.Length; i++)
             {
                 int j = i;
@@ -111,14 +114,20 @@ namespace Tiny_Compiler
                     if (j + 1 < SourceCode.Length)
                     {
                         j++;
-                        bool isThereADot = false;
-                        while (j < SourceCode.Length && (isItADigit(SourceCode[j]) || (SourceCode[j] == '.' && !isThereADot)))
+                        while (j < SourceCode.Length && (isItADigit(SourceCode[j])))
                         {
-                            // to allow only one dot then reset
-                            if (SourceCode[j] == '.')
-                                isThereADot = true;
                             CurrentLexeme += SourceCode[j];
                             j++;
+                        }
+                        if (j < SourceCode.Length && SourceCode[j] == '.')
+                        {
+                            CurrentLexeme += SourceCode[j];
+                            j++;
+                            while (j < SourceCode.Length && (isItADigit(SourceCode[j])))
+                            {
+                                CurrentLexeme += SourceCode[j];
+                                j++;
+                            }
                         }
                         j--;
                         i = j;
@@ -161,8 +170,8 @@ namespace Tiny_Compiler
                 {
                     if (j + 1 < SourceCode.Length)
                     {
-                        
-                        if (SourceCode[j+1] == '>')
+
+                        if (SourceCode[j + 1] == '>')
                         {
                             j++;
                             CurrentLexeme += SourceCode[j];
@@ -175,8 +184,8 @@ namespace Tiny_Compiler
                 {
                     if (j + 1 < SourceCode.Length)
                     {
-                      
-                        if (SourceCode[j+1] == '|')
+
+                        if (SourceCode[j + 1] == '|')
                         {
                             j++;
                             CurrentLexeme += SourceCode[j];
@@ -189,8 +198,8 @@ namespace Tiny_Compiler
                 {
                     if (j + 1 < SourceCode.Length)
                     {
-                        
-                        if (SourceCode[j+1] == '&')
+
+                        if (SourceCode[j + 1] == '&')
                         {
                             j++;
                             CurrentLexeme += SourceCode[j];
@@ -199,12 +208,12 @@ namespace Tiny_Compiler
                     }
                 }
                 // if it starts with / followed by * then allow every thing except */
-                else if (j + 1 < SourceCode.Length && CurrentChar == '/' && SourceCode[j+1] == '*')
+                else if (j + 1 < SourceCode.Length && CurrentChar == '/' && SourceCode[j + 1] == '*')
                 {
-                  
+
                     if (SourceCode[++j] == '*')
                     {
-                        int start = j - 1;
+
                         bool isAboutToFinish = false;
                         bool isFinished = false;
                         CurrentLexeme += SourceCode[j];
@@ -225,12 +234,7 @@ namespace Tiny_Compiler
                             j++;
                         }
                         j--;
-                       
-                        if(!isFinished)
-                        {
-                            j = start;
-                            CurrentLexeme = SourceCode[j].ToString();
-                        }
+
                         i = j;
 
                     }
@@ -238,13 +242,13 @@ namespace Tiny_Compiler
                 else
                 {
 
-                   
+
                 }
                 // if it's a comment then ignore
                 if (!isComment(CurrentLexeme))
                     FindTokenClass(CurrentLexeme);
             }
-            
+
             Tiny_Compiler.TokenStream = Tokens;
 
 
@@ -255,21 +259,25 @@ namespace Tiny_Compiler
             Token_Class TC;
             Token Tok = new Token();
             Tok.lex = Lex;
-            bool isIdentifed = false;
+            bool isIdentified = false;
+            string LexForReserved;
+            LexForReserved = (isCaseSensitive) ? Lex : Lex.ToLower();
+
             //Is it a reserved word?
-            if (ReservedWords.ContainsKey(Lex))
+            if (ReservedWords.ContainsKey(LexForReserved))
             {
-                Tok.token_type = ReservedWords[Lex];
+                
+                Tok.token_type = ReservedWords[LexForReserved];
                 Tokens.Add(Tok);
-                isIdentifed = true;
+                isIdentified = true;
             }
 
             //Is it an identifier?
-            if (!ReservedWords.ContainsKey(Lex) && isIdentifier(Lex))
+            if (!ReservedWords.ContainsKey(LexForReserved) && isIdentifier(Lex))
             {
                 Tok.token_type = Token_Class.Idenifier;
                 Tokens.Add(Tok);
-                isIdentifed = true;
+                isIdentified = true;
 
             }
 
@@ -278,7 +286,7 @@ namespace Tiny_Compiler
             {
                 Tok.token_type = Token_Class.Constant;
                 Tokens.Add(Tok);
-                isIdentifed = true;
+                isIdentified = true;
 
             }
 
@@ -287,13 +295,13 @@ namespace Tiny_Compiler
             {
                 Tok.token_type = Operators[Lex];
                 Tokens.Add(Tok);
-                isIdentifed = true;
+                isIdentified = true;
 
             }
-           
+
             //Is it an undefined?
-            if (!isIdentifed)
-                Errors.Error_List.Add("\"" + Lex + "\" is undefined");
+            if (!isIdentified)
+                Errors.Error_List.Add(Lex + " is undefined");
         }
 
         private bool isComment(string lex)
@@ -329,7 +337,7 @@ namespace Tiny_Compiler
         }
         bool isItALetterOrADigit(char c)
         {
-            return (c >= 'A' && c <= 'z') || (c >= '0' && c <= '9');
+            return isItADigit(c) || isItALetter(c); 
         }
 
         bool isItEmpty(char c)

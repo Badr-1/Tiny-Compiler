@@ -14,11 +14,11 @@ namespace Tiny_Compiler
         public static List<Token> TokenStream = new List<Token>();
 
 
-        public static void Start_Compiling(string SourceCode) //character by character
+        public static void Start_Compiling(string SourceCode, bool isCaseSensitive) //character by character
         {
             //Scanner
 
-            Tiny_Scanner.StartScanning(SourceCode);
+            Tiny_Scanner.StartScanning(SourceCode,isCaseSensitive);
             //Parser
             //Sematic Analysis
         }
