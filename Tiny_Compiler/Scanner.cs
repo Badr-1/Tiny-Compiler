@@ -7,18 +7,21 @@ using System.Text.RegularExpressions;
 public enum Token_Class
 {
 
-    // Reserved
-    Int,Float,String,Read,Write,Repeat,Until,If,Elseif,Else,Then,Return,Endl,End,
+    // DatatTypes
+    DataType_Int,DataType_Float,DataType_String,
+    
+    // reserved
+    Read,Write,Repeat,Until,If,Elseif,Else,Then,Return,Endline,End,
 
 
     // Oprators
-    EqualOp, LessThanOp, GreaterThanOp, NotEqualOp, PlusOp, MinusOp, MultiplyOp, DivideOp,AndOp,OrOp, AssignOP,
+    Equal, LessThan, GreaterThan, NotEqual, Plus, Minus, Multiply, Division,And,Or, Assign,
 
     //
-    Dot, Semicolon, Comma, LParanthesis, RParanthesis,LCurlyBracket,RCurlyBracket,
+    Dot, Semicolon, Comma, LeftParentheses, RightParentheses,LeftBraces,RightBraces,
 
     // else
-    Idenifier, Constant
+    Idenifier, Number ,Comment, String
 }
 namespace Tiny_Compiler
 {
@@ -34,8 +37,6 @@ namespace Tiny_Compiler
         public List<Token> Tokens = new List<Token>();
         Dictionary<string, Token_Class> ReservedWords = new Dictionary<string, Token_Class>();
         Dictionary<string, Token_Class> Operators = new Dictionary<string, Token_Class>();
-        Form1 form1 = new Form1();
-        bool isCaseSensitive;
 
 
         public Scanner()
@@ -49,37 +50,36 @@ namespace Tiny_Compiler
             ReservedWords.Add("then", Token_Class.Then);
             ReservedWords.Add("until", Token_Class.Until);
             ReservedWords.Add("write", Token_Class.Write);
-            ReservedWords.Add("int", Token_Class.Int);
-            ReservedWords.Add("float", Token_Class.Float);
-            ReservedWords.Add("string", Token_Class.String);
+            ReservedWords.Add("int", Token_Class.DataType_Int);
+            ReservedWords.Add("float", Token_Class.DataType_Float);
+            ReservedWords.Add("string", Token_Class.DataType_String);
             ReservedWords.Add("repeat", Token_Class.Repeat);
             ReservedWords.Add("return", Token_Class.Return);
-            ReservedWords.Add("endl", Token_Class.Endl);
+            ReservedWords.Add("endl", Token_Class.Endline);
 
 
-            Operators.Add(":=", Token_Class.AssignOP);
-            Operators.Add("=", Token_Class.EqualOp);
-            Operators.Add("<", Token_Class.LessThanOp);
-            Operators.Add(">", Token_Class.GreaterThanOp);
-            Operators.Add("<>", Token_Class.NotEqualOp);
-            Operators.Add("+", Token_Class.PlusOp);
-            Operators.Add("-", Token_Class.MinusOp);
-            Operators.Add("*", Token_Class.MultiplyOp);
-            Operators.Add("/", Token_Class.DivideOp);
-            Operators.Add("&&", Token_Class.AndOp);
-            Operators.Add("||", Token_Class.OrOp);
-            Operators.Add(")", Token_Class.RParanthesis);
-            Operators.Add("(", Token_Class.LParanthesis);
-            Operators.Add("}", Token_Class.RCurlyBracket);
-            Operators.Add("{", Token_Class.LCurlyBracket);
+            Operators.Add(":=", Token_Class.Assign);
+            Operators.Add("=", Token_Class.Equal);
+            Operators.Add("<", Token_Class.LessThan);
+            Operators.Add(">", Token_Class.GreaterThan);
+            Operators.Add("<>", Token_Class.NotEqual);
+            Operators.Add("+", Token_Class.Plus);
+            Operators.Add("-", Token_Class.Minus);
+            Operators.Add("*", Token_Class.Multiply);
+            Operators.Add("/", Token_Class.Division);
+            Operators.Add("&&", Token_Class.And);
+            Operators.Add("||", Token_Class.Or);
+            Operators.Add(")", Token_Class.RightParentheses);
+            Operators.Add("(", Token_Class.LeftParentheses);
+            Operators.Add("}", Token_Class.RightBraces);
+            Operators.Add("{", Token_Class.LeftBraces);
             Operators.Add(".", Token_Class.Dot);
             Operators.Add(",", Token_Class.Comma);
             Operators.Add(";", Token_Class.Semicolon);
         }
 
-        public void StartScanning(string SourceCode,bool isCaseSensitive)
+        public void StartScanning(string SourceCode)
         {
-            this.isCaseSensitive = isCaseSensitive;
             for (int i = 0; i < SourceCode.Length; i++)
             {
                 int j = i;
@@ -244,9 +244,8 @@ namespace Tiny_Compiler
 
 
                 }
-                // if it's a comment then ignore
-                if (!isComment(CurrentLexeme))
-                    FindTokenClass(CurrentLexeme);
+              
+                FindTokenClass(CurrentLexeme);
             }
 
             Tiny_Compiler.TokenStream = Tokens;
@@ -260,20 +259,19 @@ namespace Tiny_Compiler
             Token Tok = new Token();
             Tok.lex = Lex;
             bool isIdentified = false;
-            string LexForReserved;
-            LexForReserved = (isCaseSensitive) ? Lex : Lex.ToLower();
+          
 
             //Is it a reserved word?
-            if (ReservedWords.ContainsKey(LexForReserved))
+            if (ReservedWords.ContainsKey(Lex))
             {
                 
-                Tok.token_type = ReservedWords[LexForReserved];
+                Tok.token_type = ReservedWords[Lex];
                 Tokens.Add(Tok);
                 isIdentified = true;
             }
 
             //Is it an identifier?
-            if (!ReservedWords.ContainsKey(LexForReserved) && isIdentifier(Lex))
+            if (!ReservedWords.ContainsKey(Lex) && isIdentifier(Lex))
             {
                 Tok.token_type = Token_Class.Idenifier;
                 Tokens.Add(Tok);
@@ -281,10 +279,19 @@ namespace Tiny_Compiler
 
             }
 
-            //Is it a Constant?
-            if (isConstant(Lex))
+            //Is it a Number?
+            if (isNumber(Lex))
             {
-                Tok.token_type = Token_Class.Constant;
+                Tok.token_type = Token_Class.Number;
+                Tokens.Add(Tok);
+                isIdentified = true;
+
+            }
+
+            //Is it a Number?
+            if (isString(Lex))
+            {
+                Tok.token_type = Token_Class.String;
                 Tokens.Add(Tok);
                 isIdentified = true;
 
@@ -297,6 +304,14 @@ namespace Tiny_Compiler
                 Tokens.Add(Tok);
                 isIdentified = true;
 
+            }
+
+            // Is it a comment
+            if(isComment(Lex))
+            {
+                Tok.token_type = Token_Class.Comment;
+                Tokens.Add(Tok);
+                isIdentified = true;
             }
 
             //Is it an undefined?
@@ -319,11 +334,19 @@ namespace Tiny_Compiler
 
             return isValid;
         }
-        bool isConstant(string lex)
+        bool isNumber(string lex)
         {
             bool isValid = true;
             // Check if the lex is a constant (Number) or not.
-            Regex regex = new Regex("^(([0-9]+(\\.[0-9]+)?)|(\"(.*)\"))$");
+            Regex regex = new Regex("^([0-9]+(\\.[0-9]+)?)$");
+            isValid = regex.IsMatch(lex);
+            return isValid;
+        }
+
+        bool isString(string lex)
+        {
+            bool isValid = true;
+            Regex regex = new Regex("(\"(.*)\")");
             isValid = regex.IsMatch(lex);
             return isValid;
         }
