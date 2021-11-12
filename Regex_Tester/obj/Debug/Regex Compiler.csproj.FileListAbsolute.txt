@@ -1,9 +1,0 @@
-D:\Badr\Tiny\Tiny_Compiler\Tiny Compiler\bin\Debug\Tiny Compiler.exe.config
-D:\Badr\Tiny\Tiny_Compiler\Tiny Compiler\bin\Debug\Tiny Compiler.exe
-D:\Badr\Tiny\Tiny_Compiler\Tiny Compiler\bin\Debug\Tiny Compiler.pdb
-D:\Badr\Tiny\Tiny_Compiler\Tiny Compiler\obj\Debug\Regex Compiler.csprojAssemblyReference.cache
-D:\Badr\Tiny\Tiny_Compiler\Tiny Compiler\obj\Debug\Tiny_Compiler.Form1.resources
-D:\Badr\Tiny\Tiny_Compiler\Tiny Compiler\obj\Debug\Tiny_Compiler.Properties.Resources.resources
-D:\Badr\Tiny\Tiny_Compiler\Tiny Compiler\obj\Debug\Regex Compiler.csproj.GenerateResource.cache
-D:\Badr\Tiny\Tiny_Compiler\Tiny Compiler\obj\Debug\Tiny Compiler.exe
-D:\Badr\Tiny\Tiny_Compiler\Tiny Compiler\obj\Debug\Tiny Compiler.pdb
