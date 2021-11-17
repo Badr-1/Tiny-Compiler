@@ -90,120 +90,95 @@ namespace Tiny_Compiler
                     continue;
 
                 // if it starts with a char it can be a reserevedword or an identifier (allow  only digits and letters to the lexeme) 
-                if (isItALetter(CurrentChar)) //if you read a character
+                if (char.IsLetter(CurrentChar)) //if you read a character
                 {
-                    // if it's not the last char
-                    if (j + 1 < SourceCode.Length)
+
+                    while (j + 1 < SourceCode.Length && char.IsLetterOrDigit(SourceCode[j + 1]))
                     {
                         j++;
-                        while (j < SourceCode.Length && (isItALetterOrADigit(SourceCode[j])))
-                        {
-                            CurrentLexeme += SourceCode[j];
-                            j++;
-                        }
-                        j--;
-                        i = j;
+                        CurrentLexeme += SourceCode[j].ToString();
                     }
+
+                    i = j;
+                    
                 }
 
                 // if it starts with a digit it can only be a number (allow only digits and one dot)
-                else if (isItADigit(CurrentChar))
+                else if (char.IsDigit(CurrentChar))
                 {
 
-                    // if it's not the last char
-                    if (j + 1 < SourceCode.Length)
+                    while (j + 1 < SourceCode.Length && char.IsDigit(SourceCode[j + 1]))
                     {
                         j++;
-                        while (j < SourceCode.Length && (isItADigit(SourceCode[j])))
-                        {
-                            CurrentLexeme += SourceCode[j];
-                            j++;
-                        }
-                        if (j < SourceCode.Length && SourceCode[j] == '.')
-                        {
-                            CurrentLexeme += SourceCode[j];
-                            j++;
-                            while (j < SourceCode.Length && (isItADigit(SourceCode[j])))
-                            {
-                                CurrentLexeme += SourceCode[j];
-                                j++;
-                            }
-                        }
-                        j--;
-                        i = j;
+                        CurrentLexeme += SourceCode[j].ToString();
                     }
+                    if(j+1 <SourceCode.Length && SourceCode[j+1] == '.')
+                    {
+                        j++;
+                        CurrentLexeme += SourceCode[j].ToString();
+                    }
+                    while (j + 1 < SourceCode.Length && char.IsDigit(SourceCode[j + 1]))
+                    {
+                        j++;
+                        CurrentLexeme += SourceCode[j].ToString();
+                    }
+                    i = j;
                 }
 
                 // if it starts with a " then every thing is allowed till typing " again
                 else if (CurrentChar == '"')
                 {
                     // if it's not the last char
+                    while (j + 1 < SourceCode.Length && SourceCode[j + 1] != '"')
+                    {
+                        j++;
+                        CurrentLexeme += SourceCode[j].ToString();
+                    }
                     if (j + 1 < SourceCode.Length)
                     {
                         j++;
-                        while (j < SourceCode.Length && !(SourceCode[j] == '"'))
-                        {
-                            CurrentLexeme += SourceCode[j];
-                            j++;
-                        }
-                        if (j < SourceCode.Length)
-                            CurrentLexeme += SourceCode[j];
-                        i = j;
+                        CurrentLexeme += SourceCode[j];
                     }
+                    i = j;
+                    
                 }
                 // if it starts with : and followed by a = it's an assign lexeme
                 else if (CurrentChar == ':')
                 {
-                    if (j + 1 < SourceCode.Length)
+                    if (j + 1 < SourceCode.Length && SourceCode[j+1] == '=')
                     {
                         j++;
-                        if (SourceCode[j] == '=')
-                        {
-                            CurrentLexeme += SourceCode[j];
-                        }
-
+                        CurrentLexeme += SourceCode[j];
                         i = j;
                     }
                 }
                 // if it starts with < if the next is > then it's a notEqualOp or it can be just LessThanoOp
                 else if (CurrentChar == '<')
                 {
-                    if (j + 1 < SourceCode.Length)
+                    if (j + 1 < SourceCode.Length && SourceCode[j + 1] == '>')
                     {
-
-                        if (SourceCode[j + 1] == '>')
-                        {
-                            j++;
-                            CurrentLexeme += SourceCode[j];
-                        }
+                        j++;
+                        CurrentLexeme += SourceCode[j];
                         i = j;
                     }
                 }
                 // if it starts with | check if it's followed by another | to get OrOp
                 else if (CurrentChar == '|')
                 {
-                    if (j + 1 < SourceCode.Length)
+                    if (j + 1 < SourceCode.Length && SourceCode[j + 1] == '|')
                     {
-
-                        if (SourceCode[j + 1] == '|')
-                        {
-                            j++;
-                            CurrentLexeme += SourceCode[j];
-                        }
+                        j++;
+                        CurrentLexeme += SourceCode[j];
                         i = j;
                     }
                 }
                 // if it starts with | check if it's followed by another | to get AndOp
                 else if (CurrentChar == '&')
                 {
-                    if (j + 1 < SourceCode.Length)
+                    if (j + 1 < SourceCode.Length && SourceCode[j + 1] == '&')
                     {
-
-                        if (SourceCode[j + 1] == '&')
-                        {
-                            j++;
-                            CurrentLexeme += SourceCode[j];
-                        }
+                        j++;
+                        CurrentLexeme += SourceCode[j];
                         i = j;
                     }
                 }
@@ -258,7 +233,6 @@ namespace Tiny_Compiler
             Token_Class TC;
             Token Tok = new Token();
             Tok.lex = Lex;
-            bool isIdentified = false;
           
 
             //Is it a reserved word?
@@ -267,55 +241,49 @@ namespace Tiny_Compiler
                 
                 Tok.token_type = ReservedWords[Lex];
                 Tokens.Add(Tok);
-                isIdentified = true;
             }
 
             //Is it an identifier?
-            if (!ReservedWords.ContainsKey(Lex) && isIdentifier(Lex))
+            else if (isIdentifier(Lex))
             {
                 Tok.token_type = Token_Class.Idenifier;
                 Tokens.Add(Tok);
-                isIdentified = true;
 
             }
 
             //Is it a Number?
-            if (isNumber(Lex))
+            else if (isNumber(Lex))
             {
                 Tok.token_type = Token_Class.Number;
                 Tokens.Add(Tok);
-                isIdentified = true;
 
             }
 
             //Is it a Number?
-            if (isString(Lex))
+            else if (isString(Lex))
             {
                 Tok.token_type = Token_Class.String;
                 Tokens.Add(Tok);
-                isIdentified = true;
 
             }
 
             //Is it an operator?
-            if (Operators.ContainsKey(Lex))
+            else if (Operators.ContainsKey(Lex))
             {
                 Tok.token_type = Operators[Lex];
                 Tokens.Add(Tok);
-                isIdentified = true;
 
             }
 
             // Is it a comment
-            if(isComment(Lex))
+            else if(isComment(Lex))
             {
                 Tok.token_type = Token_Class.Comment;
                 Tokens.Add(Tok);
-                isIdentified = true;
             }
 
             //Is it an undefined?
-            if (!isIdentified)
+            else
                 Errors.Error_List.Add(Lex + " is undefined");
         }
 
@@ -349,19 +317,7 @@ namespace Tiny_Compiler
             Regex regex = new Regex("(\"(.*)\")");
             isValid = regex.IsMatch(lex);
             return isValid;
-        }
-        bool isItALetter(char c)
-        {
-            return (c >= 'A' && c <= 'z');
-        }
-        bool isItADigit(char c)
-        {
-            return (c >= '0' && c <= '9');
-        }
-        bool isItALetterOrADigit(char c)
-        {
-            return isItADigit(c) || isItALetter(c); 
-        }
+        } 
 
         bool isItEmpty(char c)
         {
