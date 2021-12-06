@@ -5,8 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 public enum Token_Class
-{
-
+{ 
     // DatatTypes
     DataType_Int,DataType_Float,DataType_String,
     
@@ -18,7 +17,7 @@ public enum Token_Class
     Equal, LessThan, GreaterThan, NotEqual, Plus, Minus, Multiply, Division,And,Or, Assign,
 
     //
-    Dot, Semicolon, Comma, LeftParentheses, RightParentheses,LeftBraces,RightBraces,
+    Semicolon, Comma, LeftParentheses, RightParentheses,LeftBraces,RightBraces,
 
     // else
     Idenifier, Number ,Comment, String
@@ -37,11 +36,11 @@ namespace Tiny_Compiler
         public List<Token> Tokens = new List<Token>();
         Dictionary<string, Token_Class> ReservedWords = new Dictionary<string, Token_Class>();
         Dictionary<string, Token_Class> Operators = new Dictionary<string, Token_Class>();
-
+        List<string> sperators = new List<string>();
 
         public Scanner()
         {
-
+             
             ReservedWords.Add("if", Token_Class.If);
             ReservedWords.Add("end", Token_Class.End);
             ReservedWords.Add("else", Token_Class.Else);
@@ -73,7 +72,6 @@ namespace Tiny_Compiler
             Operators.Add("(", Token_Class.LeftParentheses);
             Operators.Add("}", Token_Class.RightBraces);
             Operators.Add("{", Token_Class.LeftBraces);
-            Operators.Add(".", Token_Class.Dot);
             Operators.Add(",", Token_Class.Comma);
             Operators.Add(";", Token_Class.Semicolon);
         }
@@ -93,31 +91,21 @@ namespace Tiny_Compiler
                 if (char.IsLetter(CurrentChar)) //if you read a character
                 {
 
-                    while (j + 1 < SourceCode.Length && char.IsLetterOrDigit(SourceCode[j + 1]))
+                    while (j + 1 < SourceCode.Length && !isSaparator(SourceCode[j+1]))
                     {
                         j++;
                         CurrentLexeme += SourceCode[j].ToString();
                     }
 
                     i = j;
-                    
+
                 }
 
                 // if it starts with a digit it can only be a number (allow only digits and one dot)
                 else if (char.IsDigit(CurrentChar))
                 {
 
-                    while (j + 1 < SourceCode.Length && char.IsDigit(SourceCode[j + 1]))
-                    {
-                        j++;
-                        CurrentLexeme += SourceCode[j].ToString();
-                    }
-                    if(j+1 <SourceCode.Length && SourceCode[j+1] == '.')
-                    {
-                        j++;
-                        CurrentLexeme += SourceCode[j].ToString();
-                    }
-                    while (j + 1 < SourceCode.Length && char.IsDigit(SourceCode[j + 1]))
+                    while (j + 1 < SourceCode.Length && !isSaparator(SourceCode[j+1]))
                     {
                         j++;
                         CurrentLexeme += SourceCode[j].ToString();
@@ -140,12 +128,12 @@ namespace Tiny_Compiler
                         CurrentLexeme += SourceCode[j];
                     }
                     i = j;
-                    
+
                 }
                 // if it starts with : and followed by a = it's an assign lexeme
                 else if (CurrentChar == ':')
                 {
-                    if (j + 1 < SourceCode.Length && SourceCode[j+1] == '=')
+                    if (j + 1 < SourceCode.Length && SourceCode[j + 1] == '=')
                     {
                         j++;
                         CurrentLexeme += SourceCode[j];
@@ -219,7 +207,7 @@ namespace Tiny_Compiler
 
 
                 }
-              
+
                 FindTokenClass(CurrentLexeme);
             }
 
@@ -233,12 +221,12 @@ namespace Tiny_Compiler
             Token_Class TC;
             Token Tok = new Token();
             Tok.lex = Lex;
-          
+
 
             //Is it a reserved word?
             if (ReservedWords.ContainsKey(Lex))
             {
-                
+
                 Tok.token_type = ReservedWords[Lex];
                 Tokens.Add(Tok);
             }
@@ -276,7 +264,7 @@ namespace Tiny_Compiler
             }
 
             // Is it a comment
-            else if(isComment(Lex))
+            else if (isComment(Lex.Replace("\r", "").Replace("\t", "").Replace("\n", "").Replace(" ", "")))
             {
                 Tok.token_type = Token_Class.Comment;
                 Tokens.Add(Tok);
@@ -314,14 +302,19 @@ namespace Tiny_Compiler
         bool isString(string lex)
         {
             bool isValid = true;
-            Regex regex = new Regex("(\"(.*)\")");
+            Regex regex = new Regex("^(\"(.*)\")$");
             isValid = regex.IsMatch(lex);
             return isValid;
-        } 
+        }
 
         bool isItEmpty(char c)
         {
             return (c == ' ' || c == '\r' || c == '\n' || c == '\t');
+        }
+
+        bool isSaparator(char c)
+        {
+            return (isItEmpty(c) || Operators.ContainsKey(c.ToString()) || c == '|' || c == '&' || c == ':');
         }
 
     }
