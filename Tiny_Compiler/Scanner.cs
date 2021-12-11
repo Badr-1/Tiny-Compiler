@@ -172,19 +172,33 @@ namespace Tiny_Compiler
                 }
                 // if it starts with / followed by * then allow every thing except */
                 else if (j + 1 < SourceCode.Length && CurrentChar == '/' && SourceCode[j + 1] == '*')
-                {                                       
-                        
-                        CurrentLexeme += SourceCode[j+1];
-                        j+=2;
-                        while (j < SourceCode.Length && !(SourceCode[j-1] == '*' && SourceCode[j] == '/' ))
+                {
+
+                    ++j;
+                    bool isAboutToFinish = false;
+                    bool isFinished = false;
+                    CurrentLexeme += SourceCode[j];
+                    j++;
+                    while (j < SourceCode.Length && !isFinished)
+                    {
+
+                        if (isAboutToFinish && SourceCode[j] == '/')
                         {
-
-                             CurrentLexeme += SourceCode[j];
-                             j++;
+                            CurrentLexeme += SourceCode[j];
+                            isFinished = true;
                         }
-                        j--;
+                        else
+                        {
+                            CurrentLexeme += SourceCode[j];
+                            isAboutToFinish = (SourceCode[j] == '*');
+                        }
+                        j++;
+                    }
+                    j--;
 
-                        i = j;                   
+                    i = j;
+
+                    
                 }
                 else
                 {
