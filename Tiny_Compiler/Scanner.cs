@@ -10,7 +10,7 @@ public enum Token_Class
     DataType_Int,DataType_Float,DataType_String,
     
     // reserved
-    Read,Write,Repeat,Until,If,Elseif,Else,Then,Return,Endline,End,
+    Read,Write,Repeat,Until,If,Elseif,Else,Then,Return,Endline,End,Main,
 
 
     // Oprators
@@ -40,7 +40,7 @@ namespace Tiny_Compiler
 
         public Scanner()
         {
-             
+            ReservedWords.Add("main", Token_Class.Main);
             ReservedWords.Add("if", Token_Class.If);
             ReservedWords.Add("end", Token_Class.End);
             ReservedWords.Add("else", Token_Class.Else);
