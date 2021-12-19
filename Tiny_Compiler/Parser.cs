@@ -243,7 +243,6 @@ namespace Tiny_Compiler
                 statement.Children.Add(match(Token_Class.Semicolon));
                 return statement;
             }
-            // TODO: AssignmentStatement
             else
                 return null;
         }
@@ -309,26 +308,9 @@ namespace Tiny_Compiler
             return assignmentStatement;
         }
 
-        //Expression → string | Term | Equation
-        Node Expression()
-        {
-            Node expression = new Node("Expression");
-            if (InputPointer < TokenStream.Count && TokenStream[InputPointer].token_type == Token_Class.String)
-            {
-                expression.Children.Add(match(Token_Class.String));
-            }
-            else if (InputPointer < TokenStream.Count && isItAStartOfATerm())
-            {
-                expression.Children.Add(Term());
-            }
-            /*else
-            {
-                return expression;
-            }*/
-            return expression;
-        }
+    
 
-        //Term → Number | idetifier | fun-call
+        //Term → Number | idetifier | fun-call | equations
         Node Term()
         {
             Node term = new Node("Term");
@@ -342,6 +324,11 @@ namespace Tiny_Compiler
                     term.Children.Add(FunctionCall());
                 else
                     term.Children.Add(match(Token_Class.Idenifier));
+            }
+            else
+            {
+                term.Children.Add(Equation());
+                return term;
             }
             return term;
         }
@@ -359,14 +346,14 @@ namespace Tiny_Compiler
 
         }
 
-        // args → , identifier args |  ε
+        // args → , Term args |  ε
         Node Args()
         {
             Node args = new Node("Args");
             if (InputPointer < TokenStream.Count && TokenStream[InputPointer].token_type == Token_Class.Comma)
             {
                 args.Children.Add(match(Token_Class.Comma));
-                args.Children.Add(match(Token_Class.Idenifier));
+                args.Children.Add(Term());
                 args.Children.Add(Args());
                 return args;
             }
@@ -376,13 +363,13 @@ namespace Tiny_Compiler
             }
         }
 
-        // arg → identifier | ε
+        // arg → Term | ε
         Node Arg()
         {
             Node arg = new Node("Arg");
-            if (InputPointer < TokenStream.Count && TokenStream[InputPointer].token_type == Token_Class.Idenifier)
+            if (InputPointer < TokenStream.Count && isItAStartOfATerm(0))
             {
-                arg.Children.Add(match(Token_Class.Idenifier));
+                arg.Children.Add(Term());
                 return arg;
             }
             else
@@ -580,6 +567,163 @@ namespace Tiny_Compiler
         }
 
 
+        //Expression → string | Term | Equation
+        Node Expression()
+        {
+            Node expression = new Node("Expression");
+            if (InputPointer < TokenStream.Count && TokenStream[InputPointer].token_type == Token_Class.String)
+            {
+                expression.Children.Add(match(Token_Class.String));
+            }
+            // TODO: Ask if possible
+            else if (InputPointer < TokenStream.Count && TokenStream[InputPointer].token_type == Token_Class.LeftParentheses)
+            {
+                expression.Children.Add(Equation());
+            }
+            else if (InputPointer < TokenStream.Count && isItAStartOfATerm(0))
+            {
+                if (InputPointer + 1 < TokenStream.Count && (isItAMultOP(1) || isItAnAddOP(1)))
+                    expression.Children.Add(Equation());
+                else
+                    expression.Children.Add(Term());
+            }
+            return expression;
+        }
+
+
+        // Equation → SubEquation SubEquations
+        Node Equation ()
+        {
+            Node equation = new Node("Equation");
+            equation.Children.Add(SubEquation());
+            equation.Children.Add(SubEquations());
+            return equation;
+
+        }
+        // SubEquations → AddOp SubEquation SubEquations | ε
+        Node SubEquations()
+        {
+            Node subEquations = new Node("SubEquations");
+            if (InputPointer < TokenStream.Count && !(TokenStream[InputPointer].token_type == Token_Class.Minus || TokenStream[InputPointer].token_type == Token_Class.Plus))
+                return null;
+            subEquations.Children.Add(AddOp());
+            subEquations.Children.Add(SubEquation());
+            subEquations.Children.Add(SubEquations());
+            return subEquations;
+        }
+        // SubEquation → Equ E
+        Node SubEquation()
+        {
+            Node subEquation = new Node("SubEquation");
+            subEquation.Children.Add(Equ());
+            subEquation.Children.Add(E());
+            return subEquation;
+        }
+        // E → MultOp Equ E | ε
+        Node E()
+        {
+            Node e = new Node("E");
+            if (InputPointer < TokenStream.Count && !(TokenStream[InputPointer].token_type == Token_Class.Multiply || TokenStream[InputPointer].token_type == Token_Class.Division))
+                return null;
+            e.Children.Add(MultOp());
+            e.Children.Add(Equ());
+            e.Children.Add(E());
+            return e;
+        }
+        //Equ → EquationWith | EquationWithout
+        Node Equ()
+        {
+            Node equ = new Node("Equ");
+            if (InputPointer < TokenStream.Count && TokenStream[InputPointer].token_type == Token_Class.LeftParentheses)
+            {
+                equ.Children.Add(EquationWith());
+            }
+            else
+            {
+                equ.Children.Add(EquationWithout());
+            }
+            return equ;
+        }
+
+
+        // EquationWith → (Oprand Equations)
+        // EquationWithout → Oprand Equations
+        // Equations → AddOp Oprand Equations | ε
+        // Oprand → Term Ter
+        // Ter → MultOp Term Ter | ε
+        //Term → Number | idetifier | fun-call
+
+
+        // EquationWith → (Oprand Equations)
+        Node EquationWith()
+        {
+            Node equationWith = new Node("EquationWith");
+            equationWith.Children.Add(match(Token_Class.LeftParentheses));
+            equationWith.Children.Add(Oprand());
+            equationWith.Children.Add(Equations());
+            equationWith.Children.Add(match(Token_Class.RightParentheses));
+            return equationWith;
+        }
+        // EquationWithout → Oprand Equations
+        Node EquationWithout ()
+        {
+            Node equationWithout = new Node("EquationWithout");
+            equationWithout.Children.Add(Oprand());
+            equationWithout.Children.Add(Equations());
+            return equationWithout;
+        }
+        // Equations → AddOp Oprand Equations | ε
+        Node Equations()
+        {
+            Node equations = new Node("Equations");
+            if (InputPointer < TokenStream.Count && isItAnAddOP(0))
+            {
+                equations.Children.Add(AddOp());
+                equations.Children.Add(Oprand());
+                equations.Children.Add(Equations());
+
+                return equations;
+            }
+            else
+            {
+                return null;
+            }
+        }
+        // Oprand → Term Ter
+        Node Oprand()
+        {
+            Node oprand = new Node("Oprand");
+            oprand.Children.Add(Term());
+            oprand.Children.Add(Ter());
+            return oprand;
+        }
+        // Ter → MultOp Term Ter | ε
+        Node Ter()
+        {
+            Node ter = new Node("Ter");
+            if (InputPointer + 1 < TokenStream.Count && isItAMultOP(0) && isItAStartOfATerm(1))
+            {
+
+                ter.Children.Add(MultOp());
+                ter.Children.Add(Term());
+                ter.Children.Add(Ter());
+                return ter;
+            }
+            else
+            {
+                return null;
+            }
+        }
+        //Term → Number | idetifier | fun-call | EquationWith
+
+        // EquationWith → (Oprand Equations)
+        // Equations → AddOp Oprand Equations | ε
+        // Oprand → Term Ter
+        // Ter → MultOp Term Ter | ε
+        //Term → Number | idetifier | fun-call
+
+
+
         //ConOp → = | <> | > | < 
         Node ConOp()
         {
@@ -677,11 +821,25 @@ namespace Tiny_Compiler
                             TokenStream[InputPointer].token_type == Token_Class.DataType_String;
         }
 
-        bool isItAStartOfATerm()
+        bool isItAMultOP(int offset)
         {
-            return TokenStream[InputPointer].token_type == Token_Class.Number
+            return TokenStream[InputPointer + offset].token_type == Token_Class.Division
                             ||
-                            TokenStream[InputPointer].token_type == Token_Class.Idenifier;
+                            TokenStream[InputPointer + offset].token_type == Token_Class.Multiply;
+        }
+
+        bool isItAnAddOP(int offset)
+        {
+            return TokenStream[InputPointer + offset].token_type == Token_Class.Plus
+                            ||
+                            TokenStream[InputPointer+ offset].token_type == Token_Class.Minus;
+        }
+
+        bool isItAStartOfATerm(int offset)
+        {
+            return TokenStream[InputPointer+offset].token_type == Token_Class.Number
+                            ||
+                            TokenStream[InputPointer+offset].token_type == Token_Class.Idenifier;
         }
 
         bool isItAStartOfAnotherCondition()
