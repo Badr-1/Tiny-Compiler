@@ -20,7 +20,7 @@ public enum Token_Class
     Semicolon, Comma, LeftParentheses, RightParentheses,LeftBraces,RightBraces,
 
     // else
-    Idenifier, Number ,Comment, String
+    Identifier, Number ,Comment, String
 }
 namespace Tiny_Compiler
 {
@@ -232,7 +232,7 @@ namespace Tiny_Compiler
             //Is it an identifier?
             else if (isIdentifier(Lex))
             {
-                Tok.token_type = Token_Class.Idenifier;
+                Tok.token_type = Token_Class.Identifier;
                 Tokens.Add(Tok);
 
             }
@@ -265,7 +265,7 @@ namespace Tiny_Compiler
             else if (isComment(Lex.Replace("\r", "").Replace("\t", "").Replace("\n", "").Replace(" ", "")))
             {
                 Tok.token_type = Token_Class.Comment;
-                Tokens.Add(Tok);
+                //Tokens.Add(Tok);
             }
 
             //Is it an undefined?

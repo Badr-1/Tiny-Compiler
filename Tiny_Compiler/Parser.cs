@@ -22,7 +22,7 @@ namespace Tiny_Compiler
         int InputPointer = 0;
         List<Token> TokenStream;
         public Node root;
-
+        bool inFunctionBody = false;
         public Node StartParsing(List<Token> TokenStream)
         {
             this.InputPointer = 0;
@@ -32,13 +32,78 @@ namespace Tiny_Compiler
             return root;
         }
 
-        // Program → FunctionStatements MainFunction
+        // CFGs
+        // Program → [FunctionStatements] MainFunction
+        // MainFunction → DataType main () FunctionBody
+        // FunctionStatements → FunctionStatement FunctionStatements | ε
+        // Paramters → DataType Identifier OtherParamters | ε
+        // OtherParamters → , DataType Identifier OtherParamters |  ε
+        // FunctionStatement → FunctionDeclartion FunctionBody
+        // FunctionDeclartion → DataType identifer (Paramters)
+        // FunctionBody → { Statements ReturnStatement }
+        // Statements → Statement State
+        // State  → Statement State | ε
+        /* Statement -> IfStatement
+            *       | ReturnStatement
+            *       | ReadStatement
+            *       | WriteStatement
+            *       | RepeatStatement
+            *       | DeclarationStatement
+            *       | AssignmentStatement;
+            *       | FunctionCall;
+            *       | ε
+            */
+        // DeclarationStatement → DataType VarsDeclartion; 
+        // VarsDeclartion → identifier Initialization Declartions
+        // Declartions → , identifier Initialization Declartions | ε
+        // Initialization → := Expression | ε
+        // AssignmentStatement → identifier := epx
+        // Term → Number | idetifier | FunctionCall 
+        // FunctionCall → identifier (Args) 
+        // Args → Arg OtherArgs |  ε
+        // OtherArgs → , Arg OtherArgs | ε
+        // Arg - > Identifier | Number
+        // WriteStatement → write (Expression|Endl);       
+        // ReadStatement → read identifier;
+        // ReturnStatement → return exp;
+        // Condition → identifier ConOp term
+        // ConditionStatement → condition Conditions
+        // Conditions → Boolop Condition Conditions |  ε
+        // RepeatStatement → repeat Statements until ConditionStatement
+        // DataType → int | float | string
+        // IfStatement → if ConditionStatement then Statements [ElseifStatements] [ElseStatement] end
+        // ElseIfStatements → elseif ConditionStatement then Statements ElseIfStatements | ε
+        // ElseStatement → else Statements 
+        // Expression → string | Term | Equation7
+        // TODO: ReWrite Equation
+        // BoolOp →  || | && 
+        // AddOp → + | -
+        // MultOp → * | / 
+        // Equation → SubEquation SubEquations
+        // SubEquations → AddOp SubEquation SubEquations | ε
+        // SubEquation → SmallEquation E
+        // E → MultOp SmallEquation E | ε
+        // SmallEquation → Oprand Equations | (Oprand Equations)
+        // Equations → AddOp Oprand Equations | ε
+        // Oprand → Term Ter
+        // Ter → MultOp Term Ter | ε
+
+
+
+
+
+
+
+
+
+        // Program → [FunctionStatements] MainFunction
         Node Program()
         {
             Node program = new Node("Program");
-            program.Children.Add(FunctionStatements());
+            if (InputPointer < TokenStream.Count && isItADataType() && InputPointer + 1 < TokenStream.Count && TokenStream[InputPointer + 1].token_type != Token_Class.Main)
+                program.Children.Add(FunctionStatements());
             program.Children.Add(Main());
-            MessageBox.Show("Success");
+           // MessageBox.Show("Success");
             return program;
         }
 
@@ -55,14 +120,14 @@ namespace Tiny_Compiler
             return main;
         }
 
-        // FunctionStatements → FunctionStatement functions | ε
+        // FunctionStatements → FunctionStatement FunctionStatements | ε
         Node FunctionStatements()
         {
             Node functionStatements = new Node("FunctionStatements");
             if (InputPointer < TokenStream.Count && isItADataType() && InputPointer + 1 < TokenStream.Count && TokenStream[InputPointer + 1].token_type != Token_Class.Main)
             {
                 functionStatements.Children.Add(FunctionStatement());
-                functionStatements.Children.Add(Functions());
+                functionStatements.Children.Add(FunctionStatements());
                 return functionStatements;
             }
             else
@@ -71,45 +136,29 @@ namespace Tiny_Compiler
             }
         }
 
-        // functions → FunctionStatement functions | ε
-        Node Functions()
-        {
-            Node functions = new Node("Functions");
-            if (InputPointer < TokenStream.Count && isItADataType() && InputPointer + 1 < TokenStream.Count && TokenStream[InputPointer + 1].token_type != Token_Class.Main)
-            {
-                functions.Children.Add(FunctionStatement());
-                functions.Children.Add(Functions());
-                return functions;
-            }
-            else
-            {
-                return null;
-            }
-        }
-
-        // FunctionDeclartion → DataType identifer (Paramter Paramters)
+        // FunctionDeclartion → DataType identifer (Paramters)
         Node FunctionDeclartion()
         {
             Node functionDeclartion = new Node("FunctionDeclartion");
             functionDeclartion.Children.Add(DataType());
-            functionDeclartion.Children.Add(match(Token_Class.Idenifier));
+            functionDeclartion.Children.Add(match(Token_Class.Identifier));
             functionDeclartion.Children.Add(match(Token_Class.LeftParentheses));
-            functionDeclartion.Children.Add(Paramter());
             functionDeclartion.Children.Add(Paramters());
             functionDeclartion.Children.Add(match(Token_Class.RightParentheses));
 
             return functionDeclartion;
         }
 
-        // Paramter → DataType Identifier | ε
-        Node Paramter()
+        // Paramters → DataType Identifier OtherParamters | ε
+        Node Paramters()
         {
-            Node paramter = new Node("Paramter");
+            Node paramters = new Node("Paramters");
             if (InputPointer < TokenStream.Count && isItADataType())
             {
-                paramter.Children.Add(DataType());
-                paramter.Children.Add(match(Token_Class.Idenifier));
-                return paramter;
+                paramters.Children.Add(DataType());
+                paramters.Children.Add(match(Token_Class.Identifier));
+                paramters.Children.Add(OtherParamters());
+                return paramters;
             }
             else
             {
@@ -117,17 +166,17 @@ namespace Tiny_Compiler
             }
         }
 
-        // Paramters → , DataType Identifier Paramters |  ε
-        Node Paramters()
+        // OtherParamters → , DataType Identifier OtherParamters |  ε
+        Node OtherParamters()
         {
-            Node paramters = new Node("Paramters");
+            Node otherparamters = new Node("Paramters");
             if (InputPointer < TokenStream.Count && TokenStream[InputPointer].token_type == Token_Class.Comma)
             {
-                paramters.Children.Add(match(Token_Class.Comma));
-                paramters.Children.Add(DataType());
-                paramters.Children.Add(match(Token_Class.Idenifier));
-                paramters.Children.Add(Paramters());
-                return paramters;
+                otherparamters.Children.Add(match(Token_Class.Comma));
+                otherparamters.Children.Add(DataType());
+                otherparamters.Children.Add(match(Token_Class.Identifier));
+                otherparamters.Children.Add(OtherParamters());
+                return otherparamters;
             }
             else
             {
@@ -139,6 +188,7 @@ namespace Tiny_Compiler
         Node FunctionBody()
         {
             Node functionBody = new Node("FunctionBody");
+            inFunctionBody = true;
             functionBody.Children.Add(match(Token_Class.LeftBraces));
             functionBody.Children.Add(Statements());
             functionBody.Children.Add(ReturnStatement());
@@ -157,7 +207,7 @@ namespace Tiny_Compiler
 
 
 
-        //1.Statements → Statement State
+        // Statements → Statement State
         Node Statements()
         {
             Node statments = new Node("Statements");
@@ -167,7 +217,7 @@ namespace Tiny_Compiler
         }
 
 
-        // 2.State  → Statement State | ε
+        // State  → Statement State | ε
         Node State()
         {
 
@@ -186,8 +236,9 @@ namespace Tiny_Compiler
         }
 
 
-        /* Statement -> comment
-         *       | IfStatement
+        /* Statement ->
+         *         IfStatement
+         *       | ReturnStatement
          *       | ReadStatement
          *       | WriteStatement
          *       | RepeatStatement
@@ -199,14 +250,20 @@ namespace Tiny_Compiler
         Node Statement()
         {
             Node statement = new Node("Statement");
-            if (InputPointer < TokenStream.Count && TokenStream[InputPointer].token_type == Token_Class.Comment)
+           /* if (InputPointer < TokenStream.Count && TokenStream[InputPointer].token_type == Token_Class.Comment)
             {
                 statement.Children.Add(match(Token_Class.Comment));
                 return statement;
             }
-            else if (InputPointer < TokenStream.Count && TokenStream[InputPointer].token_type == Token_Class.If)
+            else*/ if (InputPointer < TokenStream.Count && TokenStream[InputPointer].token_type == Token_Class.If)
             {
                 statement.Children.Add(IfStatement());
+                return statement;
+            }
+            // TODO: needs to be added
+            else if (InputPointer < TokenStream.Count && TokenStream[InputPointer].token_type == Token_Class.Return && !inFunctionBody)
+            {
+                statement.Children.Add(ReturnStatement());
                 return statement;
             }
             else if (InputPointer < TokenStream.Count && TokenStream[InputPointer].token_type == Token_Class.Read)
@@ -229,28 +286,26 @@ namespace Tiny_Compiler
                 statement.Children.Add(DeclarationStatement());
                 return statement;
             }
-            else if (InputPointer < TokenStream.Count && TokenStream[InputPointer].token_type == Token_Class.Idenifier)
+            else if (InputPointer < TokenStream.Count && TokenStream[InputPointer].token_type == Token_Class.Identifier)
             {
                 if (InputPointer + 1 < TokenStream.Count && TokenStream[InputPointer + 1].token_type == Token_Class.Assign)
-                {
-                    statement.Children.Add(AssignmentStatement());      
-                }
+                    statement.Children.Add(AssignmentStatement());
                 else
-                {
                     statement.Children.Add(FunctionCall());
-                    
-                }
                 statement.Children.Add(match(Token_Class.Semicolon));
                 return statement;
             }
             else
+            {
                 return null;
+            }
+            
         }
 
-        //DeclarationStatement → DataType VarsDeclartion;
+        // DeclarationStatement → DataType VarsDeclartion; 
         Node DeclarationStatement()
         {
-            Node declaration_Statement = new Node("Declaration_Statement");
+            Node declaration_Statement = new Node("DeclarationStatement");
             declaration_Statement.Children.Add(DataType());
             declaration_Statement.Children.Add(VarsDeclation());
             declaration_Statement.Children.Add(match(Token_Class.Semicolon));
@@ -258,38 +313,42 @@ namespace Tiny_Compiler
         }
 
 
-        //VarsDeclartion → VarDeclation Declartions
+        // VarsDeclartion → identifier Initialization Declartions
         Node VarsDeclation()
         {
             Node varsDeclation = new Node("VarsDeclation");
-            varsDeclation.Children.Add(VarDeclation());
+            varsDeclation.Children.Add(match(Token_Class.Identifier));
+            varsDeclation.Children.Add(Initialization());
             varsDeclation.Children.Add(Declartions());
             return varsDeclation;
         }
-       
-        //VarDeclation → identifier | AssignmentStatement
-        Node VarDeclation()
+
+
+        // Initialization → := Expression | ε
+        Node Initialization()
         {
-            Node varDeclation = new Node("VarDeclation");
-            if (InputPointer + 1 < TokenStream.Count && TokenStream[InputPointer+1].token_type == Token_Class.Assign)
+            Node initialization = new Node("Initialization");
+            if (InputPointer < TokenStream.Count && TokenStream[InputPointer].token_type == Token_Class.Assign)
             {
-                varDeclation.Children.Add(AssignmentStatement());
+                initialization.Children.Add(match(Token_Class.Assign));
+                initialization.Children.Add(Expression());
+                return initialization;
             }
             else
             {
-                varDeclation.Children.Add(match(Token_Class.Idenifier));
+                return null;
             }
-            return varDeclation;
         }
 
-        //Declartions → ,VarDeclation Declartions | ε
+        // Declartions → , identifier Initialization Declartions | ε
         Node Declartions()
         {
             Node declartions = new Node("Declartions");
             if (InputPointer < TokenStream.Count && TokenStream[InputPointer].token_type == Token_Class.Comma)
             {
                 declartions.Children.Add(match(Token_Class.Comma));
-                declartions.Children.Add(VarDeclation());
+                declartions.Children.Add(match(Token_Class.Identifier));
+                declartions.Children.Add(Initialization());
                 declartions.Children.Add(Declartions());
                 return declartions;
             }
@@ -297,12 +356,13 @@ namespace Tiny_Compiler
             {
                 return null;
             }
-        }
-        //AssignmentStatement → identifier := epx
+        }   
+        
+        // AssignmentStatement → identifier := epx
         Node AssignmentStatement()
         {
             Node assignmentStatement = new Node("AssignmentStatement");
-            assignmentStatement.Children.Add(match(Token_Class.Idenifier));
+            assignmentStatement.Children.Add(match(Token_Class.Identifier));
             assignmentStatement.Children.Add(match(Token_Class.Assign));
             assignmentStatement.Children.Add(Expression());
             return assignmentStatement;
@@ -310,7 +370,7 @@ namespace Tiny_Compiler
 
     
 
-        //Term → Number | idetifier | fun-call | equations
+        //Term → Number | idetifier | FunctionCall 
         Node Term()
         {
             Node term = new Node("Term");
@@ -318,43 +378,50 @@ namespace Tiny_Compiler
             {
                 term.Children.Add(match(Token_Class.Number));
             }
-            else if (InputPointer < TokenStream.Count && TokenStream[InputPointer].token_type == Token_Class.Idenifier)
+            else if (InputPointer < TokenStream.Count && TokenStream[InputPointer].token_type == Token_Class.Identifier)
             {
                 if (InputPointer + 1 < TokenStream.Count && TokenStream[InputPointer+1].token_type == Token_Class.LeftParentheses)
                     term.Children.Add(FunctionCall());
                 else
-                    term.Children.Add(match(Token_Class.Idenifier));
-            }
-            else
-            {
-                term.Children.Add(Equation());
-                return term;
+                    term.Children.Add(match(Token_Class.Identifier));
             }
             return term;
         }
 
-        // FunctionCall → identifier (arg args) 
+        // FunctionCall → identifier (Args) 
         Node FunctionCall()
         {
             Node functionCall = new Node("FunctionCall");
-            functionCall.Children.Add(match(Token_Class.Idenifier));
+            functionCall.Children.Add(match(Token_Class.Identifier));
             functionCall.Children.Add(match(Token_Class.LeftParentheses));
-            functionCall.Children.Add(Arg());
             functionCall.Children.Add(Args());
             functionCall.Children.Add(match(Token_Class.RightParentheses));
             return functionCall;
-
+        }
+        // Arg - > Identifier | Number
+        Node Arg()
+        {
+            Node arg = new Node("Arg");
+            if (InputPointer < TokenStream.Count && TokenStream[InputPointer].token_type == Token_Class.Identifier)
+            {
+                arg.Children.Add(match(Token_Class.Identifier));
+            }
+            else
+            {
+                arg.Children.Add(match(Token_Class.Number));
+            }
+            return arg;
+            
         }
 
-        // args → , Term args |  ε
+        // Args → Arg OtherArgs |  ε
         Node Args()
         {
             Node args = new Node("Args");
-            if (InputPointer < TokenStream.Count && TokenStream[InputPointer].token_type == Token_Class.Comma)
+            if (InputPointer < TokenStream.Count && isItAStartOfATerm(0))
             {
-                args.Children.Add(match(Token_Class.Comma));
-                args.Children.Add(Term());
-                args.Children.Add(Args());
+                args.Children.Add(Arg());
+                args.Children.Add(OtherArgs());
                 return args;
             }
             else
@@ -363,14 +430,16 @@ namespace Tiny_Compiler
             }
         }
 
-        // arg → Term | ε
-        Node Arg()
+        // OtherArgs → , Arg OtherArgs | ε
+        Node OtherArgs()
         {
-            Node arg = new Node("Arg");
-            if (InputPointer < TokenStream.Count && isItAStartOfATerm(0))
+            Node otherArgs = new Node("OtherArgs");
+            if (InputPointer < TokenStream.Count && TokenStream[InputPointer].token_type == Token_Class.Comma)
             {
-                arg.Children.Add(Term());
-                return arg;
+                otherArgs.Children.Add(match(Token_Class.Comma));
+                otherArgs.Children.Add(Arg());
+                otherArgs.Children.Add(OtherArgs());
+                return otherArgs;
             }
             else
             {
@@ -380,30 +449,37 @@ namespace Tiny_Compiler
 
 
 
-        // WriteStatement → write (exp|Endl);       
+        // WriteStatement → write Printed;       
         Node WriteStatement()
         {
             Node writeStatement = new Node("WriteStatement");
             writeStatement.Children.Add(match(Token_Class.Write));
-            if (InputPointer < TokenStream.Count && TokenStream[InputPointer].token_type == Token_Class.Endline)
-                writeStatement.Children.Add(match(Token_Class.Endline));
-            else
-                writeStatement.Children.Add(Expression());
+            writeStatement.Children.Add(Printed());
             writeStatement.Children.Add(match(Token_Class.Semicolon));
             return writeStatement;
         }
 
+        // Printed →  Expression | Endl
+        Node Printed()
+        {
+            Node printed = new Node("Printed");
+            if (InputPointer < TokenStream.Count && TokenStream[InputPointer].token_type == Token_Class.Endline)
+                printed.Children.Add(match(Token_Class.Endline));
+            else
+                printed.Children.Add(Expression());
+            return printed;
+        }
         // ReadStatement → read identifier;
         Node ReadStatement()
         {
             Node readStatement = new Node("ReadStatement");
             readStatement.Children.Add(match(Token_Class.Read));
-            readStatement.Children.Add(match(Token_Class.Idenifier));
+            readStatement.Children.Add(match(Token_Class.Identifier));
             readStatement.Children.Add(match(Token_Class.Semicolon));
             return readStatement;
         }
 
-        //  ReturnStatement → return exp;
+        // ReturnStatement → return exp;
         Node ReturnStatement()
         {
             Node returnStatement = new Node("ReturnStatement");
@@ -413,38 +489,36 @@ namespace Tiny_Compiler
             return returnStatement;
         }
 
-
-
         // Condition → identifier ConOp term
         Node Condition()
         {
             Node condition = new Node("Condition");
-            condition.Children.Add(match(Token_Class.Idenifier));
+            condition.Children.Add(match(Token_Class.Identifier));
             condition.Children.Add(ConOp());
             condition.Children.Add(Term());
             return condition;
         }
 
 
-        // ConditionStatement → condition Conds
+        // ConditionStatement → Condition Conditions
         Node ConditionStatement()
         {
             Node conditionStatement = new Node("ConditionStatement");
             conditionStatement.Children.Add(Condition());
-            conditionStatement.Children.Add(Conds());
+            conditionStatement.Children.Add(Conditions());
             return conditionStatement;
         }
 
-        // Conds → Boolop Condition Conds |  ε
-        Node Conds()
+        // Conditions → Boolop Condition Conditions |  ε
+        Node Conditions()
         {
-            Node conds = new Node("Conds");
+            Node conditions = new Node("Conditions");
             if (InputPointer < TokenStream.Count && isItAStartOfAnotherCondition())
             {
-                conds.Children.Add(BoolOp());
-                conds.Children.Add(Condition());
-                conds.Children.Add(Conds());
-                return conds;
+                conditions.Children.Add(BoolOp());
+                conditions.Children.Add(Condition());
+                conditions.Children.Add(Conditions());
+                return conditions;
             }
             else
             {
@@ -456,6 +530,7 @@ namespace Tiny_Compiler
         Node RepeatStatement()
         {
             Node repeatStatement = new Node("RepeatStatement");
+            inFunctionBody = false;
             repeatStatement.Children.Add(match(Token_Class.Repeat));
             repeatStatement.Children.Add(Statements());
             repeatStatement.Children.Add(match(Token_Class.Until));
@@ -486,84 +561,57 @@ namespace Tiny_Compiler
         }
 
 
-        //IfStatement → if ConditionStatement then Statements ElseIfStatements ElseStatement end
+        // IfStatement → if ConditionStatement then Statements [ElseifStatements] [ElseStatement] end
         Node IfStatement()
         {
             Node ifStatement = new Node("IfStatement");
+            inFunctionBody = false;
             ifStatement.Children.Add(match(Token_Class.If));
             ifStatement.Children.Add(ConditionStatement());
             ifStatement.Children.Add(match(Token_Class.Then));
             ifStatement.Children.Add(Statements());
-            ifStatement.Children.Add(ElseIfStatements());
-            ifStatement.Children.Add(ElseStatement());
-
+            if (InputPointer < TokenStream.Count && TokenStream[InputPointer].token_type == Token_Class.Elseif)
+            {
+                ifStatement.Children.Add(ElseIfStatements());
+            }
+            if (InputPointer < TokenStream.Count && TokenStream[InputPointer].token_type == Token_Class.Else)
+            {
+                ifStatement.Children.Add(ElseStatement());
+            }
             ifStatement.Children.Add(match(Token_Class.End));
             return ifStatement;
-
-
         }
 
-        //ElseIfStatements → ElseIfStatement ElseIfs
+
+        // ElseIfStatements → elseif ConditionStatement then Statements ElseIfStatements | ε
         Node ElseIfStatements()
         {
             Node elseIfStatements = new Node("ElseIfStatements");
-            elseIfStatements.Children.Add(ElseIfStatement());
-            elseIfStatements.Children.Add(ElseIfs());
-            return elseIfStatements;
+            if (InputPointer < TokenStream.Count && TokenStream[InputPointer].token_type == Token_Class.Elseif)
+            {
+                elseIfStatements.Children.Add(match(Token_Class.Elseif));
+                elseIfStatements.Children.Add(ConditionStatement());
+                elseIfStatements.Children.Add(match(Token_Class.Then));
+                elseIfStatements.Children.Add(Statements());
+                elseIfStatements.Children.Add(ElseIfStatements());
+                return elseIfStatements;
+            }
+            else
+            {
+                return null;
+            }
 
         }
         
-        // ElseIfs → ElseIfStatement ElseIfs | ε
-        Node ElseIfs()
-        {
-            Node elseIfs = new Node("ElseIfs");
-            if (InputPointer < TokenStream.Count && TokenStream[InputPointer].token_type == Token_Class.Elseif)
-            {
-                elseIfs.Children.Add(ElseIfStatement());
-                elseIfs.Children.Add(ElseIfs());
-                return elseIfs;
-            }
-            else
-            {
-                return null;
-            }
+      
 
-
-        }
-
-        // ElseIfStatement → elseif ConditionStatement then Statements | ε
-        Node ElseIfStatement()
-        {
-            Node elseIfStatement = new Node("ElseIfStatement");
-            if (InputPointer < TokenStream.Count && TokenStream[InputPointer].token_type == Token_Class.Elseif)
-            {
-                elseIfStatement.Children.Add(match(Token_Class.Elseif));
-                elseIfStatement.Children.Add(ConditionStatement());
-                elseIfStatement.Children.Add(match(Token_Class.Then));
-                elseIfStatement.Children.Add(Statements());
-                return elseIfStatement;
-            }
-            else
-            {
-                return null;
-            }
-        }
-
-        // ElseStatement → else Statements | ε
+        // ElseStatement → else Statements 
         Node ElseStatement()
         {
             Node elseStatement = new Node("ElseStatement");
-            if (InputPointer < TokenStream.Count && TokenStream[InputPointer].token_type == Token_Class.Else)
-            {
-                elseStatement.Children.Add(match(Token_Class.Else));
-                elseStatement.Children.Add(Statements());
-                return elseStatement;
-            }
-            else
-            {
-                return null;
-            }
-
+            elseStatement.Children.Add(match(Token_Class.Else));
+            elseStatement.Children.Add(Statements());
+            return elseStatement;
         }
 
 
@@ -575,11 +623,6 @@ namespace Tiny_Compiler
             {
                 expression.Children.Add(match(Token_Class.String));
             }
-            // TODO: Ask if possible
-            else if (InputPointer < TokenStream.Count && TokenStream[InputPointer].token_type == Token_Class.LeftParentheses)
-            {
-                expression.Children.Add(Equation());
-            }
             else if (InputPointer < TokenStream.Count && isItAStartOfATerm(0))
             {
                 if (InputPointer + 1 < TokenStream.Count && (isItAMultOP(1) || isItAnAddOP(1)))
@@ -587,10 +630,14 @@ namespace Tiny_Compiler
                 else
                     expression.Children.Add(Term());
             }
+            else if(InputPointer < TokenStream.Count && TokenStream[InputPointer].token_type == Token_Class.LeftParentheses)
+            {
+                expression.Children.Add(Equation());
+            }
             return expression;
         }
 
-
+        
         // Equation → SubEquation SubEquations
         Node Equation ()
         {
@@ -604,79 +651,67 @@ namespace Tiny_Compiler
         Node SubEquations()
         {
             Node subEquations = new Node("SubEquations");
-            if (InputPointer < TokenStream.Count && !(TokenStream[InputPointer].token_type == Token_Class.Minus || TokenStream[InputPointer].token_type == Token_Class.Plus))
-                return null;
-            subEquations.Children.Add(AddOp());
-            subEquations.Children.Add(SubEquation());
-            subEquations.Children.Add(SubEquations());
-            return subEquations;
-        }
-        // SubEquation → Equ E
-        Node SubEquation()
-        {
-            Node subEquation = new Node("SubEquation");
-            subEquation.Children.Add(Equ());
-            subEquation.Children.Add(E());
-            return subEquation;
-        }
-        // E → MultOp Equ E | ε
-        Node E()
-        {
-            Node e = new Node("E");
-            if (InputPointer < TokenStream.Count && !(TokenStream[InputPointer].token_type == Token_Class.Multiply || TokenStream[InputPointer].token_type == Token_Class.Division))
-                return null;
-            e.Children.Add(MultOp());
-            e.Children.Add(Equ());
-            e.Children.Add(E());
-            return e;
-        }
-        //Equ → EquationWith | EquationWithout
-        Node Equ()
-        {
-            Node equ = new Node("Equ");
-            if (InputPointer < TokenStream.Count && TokenStream[InputPointer].token_type == Token_Class.LeftParentheses)
+            if (InputPointer < TokenStream.Count && isItAnAddOP(0))
             {
-                equ.Children.Add(EquationWith());
+                subEquations.Children.Add(AddOp());
+                subEquations.Children.Add(SubEquation());
+                subEquations.Children.Add(SubEquations());
+                return subEquations;
             }
             else
             {
-                equ.Children.Add(EquationWithout());
+                return null;
             }
-            return equ;
         }
-
-
-        // EquationWith → (Oprand Equations)
-        // EquationWithout → Oprand Equations
-        // Equations → AddOp Oprand Equations | ε
-        // Oprand → Term Ter
-        // Ter → MultOp Term Ter | ε
-        //Term → Number | idetifier | fun-call
-
-
-        // EquationWith → (Oprand Equations)
-        Node EquationWith()
+        // SubEquation → SmallEquation E
+        Node SubEquation()
         {
-            Node equationWith = new Node("EquationWith");
-            equationWith.Children.Add(match(Token_Class.LeftParentheses));
-            equationWith.Children.Add(Oprand());
-            equationWith.Children.Add(Equations());
-            equationWith.Children.Add(match(Token_Class.RightParentheses));
-            return equationWith;
+            Node subEquation = new Node("SubEquation");
+            subEquation.Children.Add(SmallEquation());
+            subEquation.Children.Add(E());
+            return subEquation;
         }
-        // EquationWithout → Oprand Equations
-        Node EquationWithout ()
+        // E → MultOp SmallEquation E | ε
+        Node E()
         {
-            Node equationWithout = new Node("EquationWithout");
-            equationWithout.Children.Add(Oprand());
-            equationWithout.Children.Add(Equations());
-            return equationWithout;
+            Node e = new Node("E");
+            if (InputPointer < TokenStream.Count && isItAMultOP(0))
+            {
+                e.Children.Add(MultOp());
+                e.Children.Add(SmallEquation());
+                e.Children.Add(E());
+                return e;
+            }
+           else
+            {
+                return null;
+            }
+        }
+      
+        // SmallEquation → Oprand Equations | (Oprand Equations)
+        Node SmallEquation ()
+        {
+            Node smallEquation = new Node("SmallEquation");
+            if (InputPointer < TokenStream.Count && TokenStream[InputPointer].token_type == Token_Class.LeftParentheses)
+            {
+                smallEquation.Children.Add(match(Token_Class.LeftParentheses));
+                smallEquation.Children.Add(Oprand());
+                smallEquation.Children.Add(Equations());
+                smallEquation.Children.Add(match(Token_Class.RightParentheses));
+                return smallEquation;
+            }
+            else
+            {
+                smallEquation.Children.Add(Oprand());
+                smallEquation.Children.Add(Equations());
+                return smallEquation;
+            }
         }
         // Equations → AddOp Oprand Equations | ε
         Node Equations()
         {
             Node equations = new Node("Equations");
-            if (InputPointer < TokenStream.Count && isItAnAddOP(0))
+            if (InputPointer < TokenStream.Count && isItAnAddOP(0) && isItAStartOfATerm(1))
             {
                 equations.Children.Add(AddOp());
                 equations.Children.Add(Oprand());
@@ -714,13 +749,6 @@ namespace Tiny_Compiler
                 return null;
             }
         }
-        //Term → Number | idetifier | fun-call | EquationWith
-
-        // EquationWith → (Oprand Equations)
-        // Equations → AddOp Oprand Equations | ε
-        // Oprand → Term Ter
-        // Ter → MultOp Term Ter | ε
-        //Term → Number | idetifier | fun-call
 
 
 
@@ -762,7 +790,7 @@ namespace Tiny_Compiler
             return boolOp;
         }
 
-        //AddOp → + | -
+        // AddOp → + | -
         Node AddOp()
         {
             Node addOp = new Node("AddOp");
@@ -777,7 +805,7 @@ namespace Tiny_Compiler
             return addOp;
         }
 
-        // 	MultOp → * | / 
+        // MultOp → * | / 
         Node MultOp()
         {
             Node multOp = new Node("MultOp");
@@ -806,7 +834,7 @@ namespace Tiny_Compiler
                             ||
                             TokenStream[InputPointer].token_type == Token_Class.If
                             ||
-                            TokenStream[InputPointer].token_type == Token_Class.Idenifier
+                            TokenStream[InputPointer].token_type == Token_Class.Identifier
                             ||
                             isItADataType()
                             ;
@@ -839,7 +867,7 @@ namespace Tiny_Compiler
         {
             return TokenStream[InputPointer+offset].token_type == Token_Class.Number
                             ||
-                            TokenStream[InputPointer+offset].token_type == Token_Class.Idenifier;
+                            TokenStream[InputPointer+offset].token_type == Token_Class.Identifier;
         }
 
         bool isItAStartOfAnotherCondition()

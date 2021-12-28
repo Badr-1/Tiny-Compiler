@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.textBox1 = new System.Windows.Forms.TextBox();
             this.textBox2 = new System.Windows.Forms.TextBox();
             this.button1 = new System.Windows.Forms.Button();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
@@ -38,19 +37,9 @@
             this.label2 = new System.Windows.Forms.Label();
             this.button2 = new System.Windows.Forms.Button();
             this.treeView1 = new System.Windows.Forms.TreeView();
+            this.textBox1 = new System.Windows.Forms.RichTextBox();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
-            // 
-            // textBox1
-            // 
-            this.textBox1.Font = new System.Drawing.Font("Tahoma", 14F);
-            this.textBox1.Location = new System.Drawing.Point(10, 34);
-            this.textBox1.Margin = new System.Windows.Forms.Padding(2);
-            this.textBox1.Multiline = true;
-            this.textBox1.Name = "textBox1";
-            this.textBox1.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox1.Size = new System.Drawing.Size(427, 494);
-            this.textBox1.TabIndex = 0;
             // 
             // textBox2
             // 
@@ -61,7 +50,6 @@
             this.textBox2.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.textBox2.Size = new System.Drawing.Size(339, 110);
             this.textBox2.TabIndex = 1;
-            this.textBox2.TextChanged += new System.EventHandler(this.textBox2_TextChanged);
             // 
             // button1
             // 
@@ -137,16 +125,28 @@
             // 
             // treeView1
             // 
+            this.treeView1.Font = new System.Drawing.Font("Tahoma", 10F);
             this.treeView1.Location = new System.Drawing.Point(752, 34);
             this.treeView1.Name = "treeView1";
             this.treeView1.Size = new System.Drawing.Size(339, 361);
             this.treeView1.TabIndex = 7;
+            // 
+            // textBox1
+            // 
+            this.textBox1.Font = new System.Drawing.Font("Tahoma", 16F);
+            this.textBox1.Location = new System.Drawing.Point(17, 34);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(402, 494);
+            this.textBox1.TabIndex = 8;
+            this.textBox1.Text = "";
+            this.textBox1.WordWrap = false;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1114, 543);
+            this.Controls.Add(this.textBox1);
             this.Controls.Add(this.treeView1);
             this.Controls.Add(this.button2);
             this.Controls.Add(this.label2);
@@ -154,10 +154,10 @@
             this.Controls.Add(this.dataGridView1);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.textBox2);
-            this.Controls.Add(this.textBox1);
             this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "Form1";
             this.Text = "Form1";
+            this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -165,8 +165,6 @@
         }
 
         #endregion
-
-        private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.TextBox textBox2;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.DataGridView dataGridView1;
@@ -176,6 +174,7 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.TreeView treeView1;
+        private System.Windows.Forms.RichTextBox textBox1;
     }
 }
 
