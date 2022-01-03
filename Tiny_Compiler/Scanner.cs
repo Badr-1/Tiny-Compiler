@@ -206,9 +206,11 @@ namespace Tiny_Compiler
 
                 }
 
-                FindTokenClass(CurrentLexeme);
+                // Is it a comment then ignore
+                if (!isComment(CurrentLexeme.Replace("\r", "").Replace("\t", "").Replace("\n", "").Replace(" ", "")))
+                    FindTokenClass(CurrentLexeme);
             }
-
+            
             Tiny_Compiler.TokenStream = Tokens;
 
 
@@ -216,7 +218,6 @@ namespace Tiny_Compiler
         }
         void FindTokenClass(string Lex)
         {
-            Token_Class TC;
             Token Tok = new Token();
             Tok.lex = Lex;
 
@@ -261,12 +262,7 @@ namespace Tiny_Compiler
 
             }
 
-            // Is it a comment
-            else if (isComment(Lex.Replace("\r", "").Replace("\t", "").Replace("\n", "").Replace(" ", "")))
-            {
-                Tok.token_type = Token_Class.Comment;
-                //Tokens.Add(Tok);
-            }
+           
 
             //Is it an undefined?
             else

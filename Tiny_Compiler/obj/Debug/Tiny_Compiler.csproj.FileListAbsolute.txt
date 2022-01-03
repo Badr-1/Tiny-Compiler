@@ -1,4 +1,3 @@
-D:\Badr\Tiny\Tiny_Compiler\Tiny_Compiler\obj\Debug\Tiny_Compiler.csprojAssemblyReference.cache
 D:\Badr\Tiny\Tiny_Compiler\Tiny_Compiler\obj\Debug\Tiny_Compiler.Form1.resources
 D:\Badr\Tiny\Tiny_Compiler\Tiny_Compiler\obj\Debug\Tiny_Compiler.Form2.resources
 D:\Badr\Tiny\Tiny_Compiler\Tiny_Compiler\obj\Debug\Tiny_Compiler.Properties.Resources.resources
@@ -8,3 +7,6 @@ D:\Badr\Tiny\Tiny_Compiler\Tiny_Compiler\bin\Debug\Tiny_Compiler.exe
 D:\Badr\Tiny\Tiny_Compiler\Tiny_Compiler\bin\Debug\Tiny_Compiler.pdb
 D:\Badr\Tiny\Tiny_Compiler\Tiny_Compiler\obj\Debug\Tiny_Compiler.exe
 D:\Badr\Tiny\Tiny_Compiler\Tiny_Compiler\obj\Debug\Tiny_Compiler.pdb
+D:\Badr\Tiny\Tiny_Compiler\Tiny_Compiler\obj\Debug\Tiny_Compiler.csproj.AssemblyReference.cache
+D:\Badr\Tiny\Tiny_Compiler\Tiny_Compiler\obj\Debug\Tiny_Compiler.csproj.SuggestedBindingRedirects.cache
+D:\Badr\Tiny\Tiny_Compiler\Tiny_Compiler\obj\Debug\Tiny_Compiler.csproj.CoreCompileInputs.cache
