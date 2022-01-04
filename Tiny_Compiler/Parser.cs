@@ -554,7 +554,7 @@ namespace Tiny_Compiler
             {
                 dataType.Children.Add(match(Token_Class.DataType_String));
             }
-            else if (InputPointer < TokenStream.Count && TokenStream[InputPointer].token_type == Token_Class.DataType_Float)
+            else
             {
                 dataType.Children.Add(match(Token_Class.DataType_Float));
             }
