@@ -32,7 +32,7 @@ namespace Tiny_Compiler
             return root;
         }
 
-        // CFGs
+        /* CFGs
         // Program → [FunctionStatements] MainFunction
         // MainFunction → DataType main () FunctionBody
         // FunctionStatements → FunctionStatement FunctionStatements | ε
@@ -43,16 +43,15 @@ namespace Tiny_Compiler
         // FunctionBody → { Statements ReturnStatement }
         // Statements → Statement State
         // State  → Statement State | ε
-        /* Statement -> IfStatement
-            *       | ReturnStatement
-            *       | ReadStatement
-            *       | WriteStatement
-            *       | RepeatStatement
-            *       | DeclarationStatement
-            *       | AssignmentStatement;
-            *       | FunctionCall;
-            *       | ε
-            */
+        // Statement -> IfStatement
+        //              | ReturnStatement
+        //              | ReadStatement
+        //              | WriteStatement
+        //              | RepeatStatement
+        //              | DeclarationStatement
+        //              | AssignmentStatement;
+        //              | FunctionCall;
+        //              | ε
         // DeclarationStatement → DataType VarsDeclartion; 
         // VarsDeclartion → identifier Initialization Declartions
         // Declartions → , identifier Initialization Declartions | ε
@@ -79,16 +78,12 @@ namespace Tiny_Compiler
         // BoolOp →  || | && 
         // AddOp → + | -
         // MultOp → * | / 
-        // Equation → SubEquation SubEquations
-        // SubEquations → AddOp SubEquation SubEquations | ε
-        // SubEquation → SmallEquation E
-        // E → MultOp SmallEquation E | ε
-        // SmallEquation → Oprand Equations | (Oprand Equations)
+        // Equation → Oprand Equations
         // Equations → AddOp Oprand Equations | ε
-        // Oprand → Term Ter
-        // Ter → MultOp Term Ter | ε
-
-
+        // Oprand → Factor Ter
+        // Ter → MultOp Factor Ter | ε
+        // Factor → Term | (Equation)
+        */
 
 
 
@@ -250,12 +245,13 @@ namespace Tiny_Compiler
         Node Statement()
         {
             Node statement = new Node("Statement");
-           /* if (InputPointer < TokenStream.Count && TokenStream[InputPointer].token_type == Token_Class.Comment)
-            {
-                statement.Children.Add(match(Token_Class.Comment));
-                return statement;
-            }
-            else*/ if (InputPointer < TokenStream.Count && TokenStream[InputPointer].token_type == Token_Class.If)
+            /* if (InputPointer < TokenStream.Count && TokenStream[InputPointer].token_type == Token_Class.Comment)
+             {
+                 statement.Children.Add(match(Token_Class.Comment));
+                 return statement;
+             }
+             else*/
+            if (InputPointer < TokenStream.Count && TokenStream[InputPointer].token_type == Token_Class.If)
             {
                 statement.Children.Add(IfStatement());
                 return statement;
@@ -299,7 +295,7 @@ namespace Tiny_Compiler
             {
                 return null;
             }
-            
+
         }
 
         // DeclarationStatement → DataType VarsDeclartion; 
@@ -356,8 +352,8 @@ namespace Tiny_Compiler
             {
                 return null;
             }
-        }   
-        
+        }
+
         // AssignmentStatement → identifier := epx
         Node AssignmentStatement()
         {
@@ -368,7 +364,7 @@ namespace Tiny_Compiler
             return assignmentStatement;
         }
 
-    
+
 
         //Term → Number | idetifier | FunctionCall 
         Node Term()
@@ -379,8 +375,8 @@ namespace Tiny_Compiler
                 term.Children.Add(match(Token_Class.Number));
             }
             else if (InputPointer < TokenStream.Count && TokenStream[InputPointer].token_type == Token_Class.Identifier && InputPointer + 1 < TokenStream.Count && TokenStream[InputPointer + 1].token_type == Token_Class.LeftParentheses)
-            {      
-                term.Children.Add(FunctionCall());       
+            {
+                term.Children.Add(FunctionCall());
             }
             else
             {
@@ -412,7 +408,7 @@ namespace Tiny_Compiler
                 arg.Children.Add(match(Token_Class.Number));
             }
             return arg;
-            
+
         }
 
         // Args → Arg OtherArgs |  ε
@@ -603,8 +599,8 @@ namespace Tiny_Compiler
             }
 
         }
-        
-      
+
+
 
         // ElseStatement → else Statements 
         Node ElseStatement()
@@ -639,81 +635,23 @@ namespace Tiny_Compiler
             return expression;
         }
 
-        
-        // Equation → SubEquation SubEquations
-        Node Equation ()
+
+        // Equation → Oprand Equations
+        Node Equation()
         {
             Node equation = new Node("Equation");
-            equation.Children.Add(SubEquation());
-            equation.Children.Add(SubEquations());
+            equation.Children.Add(Oprand());
+            equation.Children.Add(Equations());
             return equation;
 
         }
-        // SubEquations → AddOp SubEquation SubEquations | ε
-        Node SubEquations()
-        {
-            Node subEquations = new Node("SubEquations");
-            if (InputPointer < TokenStream.Count && isItAnAddOP(0))
-            {
-                subEquations.Children.Add(AddOp());
-                subEquations.Children.Add(SubEquation());
-                subEquations.Children.Add(SubEquations());
-                return subEquations;
-            }
-            else
-            {
-                return null;
-            }
-        }
-        // SubEquation → SmallEquation E
-        Node SubEquation()
-        {
-            Node subEquation = new Node("SubEquation");
-            subEquation.Children.Add(SmallEquation());
-            subEquation.Children.Add(E());
-            return subEquation;
-        }
-        // E → MultOp SmallEquation E | ε
-        Node E()
-        {
-            Node e = new Node("E");
-            if (InputPointer < TokenStream.Count && isItAMultOP(0))
-            {
-                e.Children.Add(MultOp());
-                e.Children.Add(SmallEquation());
-                e.Children.Add(E());
-                return e;
-            }
-           else
-            {
-                return null;
-            }
-        }
-      
-        // SmallEquation → Oprand Equations | (Oprand Equations)
-        Node SmallEquation ()
-        {
-            Node smallEquation = new Node("SmallEquation");
-            if (InputPointer < TokenStream.Count && TokenStream[InputPointer].token_type == Token_Class.LeftParentheses)
-            {
-                smallEquation.Children.Add(match(Token_Class.LeftParentheses));
-                smallEquation.Children.Add(Oprand());
-                smallEquation.Children.Add(Equations());
-                smallEquation.Children.Add(match(Token_Class.RightParentheses));
-                return smallEquation;
-            }
-            else
-            {
-                smallEquation.Children.Add(Oprand());
-                smallEquation.Children.Add(Equations());
-                return smallEquation;
-            }
-        }
+
+
         // Equations → AddOp Oprand Equations | ε
         Node Equations()
         {
             Node equations = new Node("Equations");
-            if (InputPointer < TokenStream.Count && isItAnAddOP(0) && isItAStartOfATerm(1))
+            if (InputPointer < TokenStream.Count && isItAnAddOP(0) && (isItAStartOfATerm(1) || TokenStream[InputPointer + 1].token_type == Token_Class.LeftParentheses))
             {
                 equations.Children.Add(AddOp());
                 equations.Children.Add(Oprand());
@@ -726,23 +664,23 @@ namespace Tiny_Compiler
                 return null;
             }
         }
-        // Oprand → Term Ter
+        // Oprand → Factor Ter
         Node Oprand()
         {
             Node oprand = new Node("Oprand");
-            oprand.Children.Add(Term());
+            oprand.Children.Add(Factor());
             oprand.Children.Add(Ter());
             return oprand;
         }
-        // Ter → MultOp Term Ter | ε
+        // Ter → MultOp Factor Ter | ε
         Node Ter()
         {
             Node ter = new Node("Ter");
-            if (InputPointer + 1 < TokenStream.Count && isItAMultOP(0) && isItAStartOfATerm(1))
+            if (InputPointer + 1 < TokenStream.Count && isItAMultOP(0) && (isItAStartOfATerm(1) || TokenStream[InputPointer + 1].token_type == Token_Class.LeftParentheses))
             {
 
                 ter.Children.Add(MultOp());
-                ter.Children.Add(Term());
+                ter.Children.Add(Factor());
                 ter.Children.Add(Ter());
                 return ter;
             }
@@ -752,6 +690,20 @@ namespace Tiny_Compiler
             }
         }
 
+        // Factor → Term | (Equation)
+        Node Factor()
+        {
+            Node factor = new Node("Factor");
+            if (InputPointer < TokenStream.Count && TokenStream[InputPointer].token_type == Token_Class.LeftParentheses)
+            {
+                factor.Children.Add(match(Token_Class.LeftParentheses));
+                factor.Children.Add(Equation());
+                factor.Children.Add(match(Token_Class.RightParentheses));
+            }
+            else
+                factor.Children.Add(Term());
+            return factor;
+        }
 
 
         //ConOp → = | <> | > | < 
@@ -801,7 +753,7 @@ namespace Tiny_Compiler
                 addOp.Children.Add(match(Token_Class.Plus));
             }
             else
-            { 
+            {
                 addOp.Children.Add(match(Token_Class.Minus));
             }
             return addOp;
@@ -862,14 +814,14 @@ namespace Tiny_Compiler
         {
             return TokenStream[InputPointer + offset].token_type == Token_Class.Plus
                             ||
-                            TokenStream[InputPointer+ offset].token_type == Token_Class.Minus;
+                            TokenStream[InputPointer + offset].token_type == Token_Class.Minus;
         }
 
         bool isItAStartOfATerm(int offset)
         {
-            return TokenStream[InputPointer+offset].token_type == Token_Class.Number
+            return TokenStream[InputPointer + offset].token_type == Token_Class.Number
                             ||
-                            TokenStream[InputPointer+offset].token_type == Token_Class.Identifier;
+                            TokenStream[InputPointer + offset].token_type == Token_Class.Identifier;
         }
 
         bool isItAStartOfAnotherCondition()
@@ -931,6 +883,6 @@ namespace Tiny_Compiler
             }
             return tree;
         }
-        
+
     }
 }
